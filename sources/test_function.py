@@ -19,8 +19,8 @@ def triangle_function():
     t = linspace(0,100,100)
     y = zeros(len(t))
     for i in range(0,int(len(t)/2)):
-        y[2*i] = 0
-        y[2*i+1] = 1  
+        y[2*i] = 1
+        y[2*i+1] = -1  
 
     return[t,y] 
 
