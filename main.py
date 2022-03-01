@@ -109,7 +109,7 @@ def VMD_example():
 
     plt.show()
 
-#%% VMD clustering 
+#%% EWT clustering 
 def EWT_example():
     #Sinusoidal example 
     [t, X] = test_function.sinusoidal_function()
@@ -126,7 +126,7 @@ def EWT_example():
     plt.figure()
     plt.xlabel('t')
     plt.ylabel('X (t)')
-    plt.title('VMD') 
+    plt.title('EWT') 
     for i in range(0, EWT_modes):
         plt.subplot(EWT_modes, 1, i+1)
         plt.plot(t, ewt[:, i])
@@ -150,10 +150,58 @@ def EWT_example():
     plt.figure()
     plt.xlabel('t')
     plt.ylabel('X (t)')
-    plt.title('VMD') 
+    plt.title('EWT') 
     for i in range(0, EWT_modes):
         plt.subplot(EWT_modes, 1, i+1)
         plt.plot(t, ewt[:, i])
+
+    plt.show()
+
+#%% EWT clustering 
+def EMD_example():
+    #Sinusoidal example 
+    [t, X] = test_function.sinusoidal_function()
+
+    plt.figure()
+    plt.plot(t,X)
+    plt.xlabel('t')
+    plt.ylabel('X (t)')
+    plt.title('Sinusoidal function') 
+
+    IMF = clustering.EMD_clustering(t, X)
+    EMD_modes = IMF.shape[0]
+
+    plt.figure()
+    plt.xlabel('t')
+    plt.ylabel('X (t)')
+    plt.title('EMD') 
+    for i in range(0, EMD_modes):
+        plt.subplot(EMD_modes, 1, i+1)
+        plt.plot(t, IMF[i, :])
+
+    plt.show()
+
+
+    #Square + triangle functions 
+    [t, X] = test_function.square_function()
+    [t, Y] = test_function.triangle_function()
+
+    plt.figure()
+    plt.plot(t,X+Y)
+    plt.xlabel('t')
+    plt.ylabel('X+Y (t)')
+    plt.title('Square + triangle function') 
+
+    IMF = clustering.EMD_clustering(t, X)
+    EMD_modes = IMF.shape[0]
+
+    plt.figure()
+    plt.xlabel('t')
+    plt.ylabel('X (t)')
+    plt.title('EMD') 
+    for i in range(0, EMD_modes):
+        plt.subplot(EMD_modes, 1, i+1)
+        plt.plot(t, IMF[i, :])
 
     plt.show()
 
@@ -164,4 +212,6 @@ if __name__ == "__main__":
 
     # VMD_example()
 
-    EWT_example()
+    # EWT_example()
+
+    EMD_example()
