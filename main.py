@@ -11,6 +11,7 @@ except:
 import test_function
 import bispectrum
 import clustering
+import feature_extraction
 
 #%%Bispectrum 
 def bispectrum_example():
@@ -207,13 +208,20 @@ def EMD_example():
 
     plt.show()
 
+def feature_extraction_example():
+    [t, X] = test_function.sinusoidal_function()
+    SP = feature_extraction.SPow(t,X)
+    print("Spectral Power: SP=", SP)
+
 
 if __name__ == "__main__":
     #Run examples 
-    bispectrum_example()
+    # bispectrum_example()
 
     # VMD_example()
 
     # EWT_example()
 
     # EMD_example()
+
+    feature_extraction_example()
