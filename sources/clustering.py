@@ -40,17 +40,17 @@ def EWT_clustering(X, K_modes):
 
     return ewt
 
-def EMD_clustering(t, X):
+def EMD_clustering(t, X, K_modes):
     """Computes the EMD (Empirical Mode Decomposition) of
     the time series.
 
     Intent(in): t (numpy.array), timestamps;
                 X (numpy.array), time series;
-                K_modes (int), number of modes to decompose the signal.
+                K_modes (int), maximum number of modes to decompose the signal.
 
     Returns: IMF (numpy.array), decomposed time series.
     """
 
-    IMF = EMD().emd(X,t)
+    IMF = EMD().emd(X,t, max_imf=K_modes)
 
     return IMF

@@ -168,7 +168,8 @@ def EMD_example():
     plt.ylabel('X (t)')
     plt.title('Sinusoidal function') 
 
-    IMF = clustering.EMD_clustering(t, X)
+    max_IMF = 3
+    IMF = clustering.EMD_clustering(t, X, max_IMF)
     EMD_modes = IMF.shape[0]
 
     plt.figure()
@@ -192,7 +193,8 @@ def EMD_example():
     plt.ylabel('X+Y (t)')
     plt.title('Square + triangle function') 
 
-    IMF = clustering.EMD_clustering(t, X)
+    max_IMF = 2
+    IMF = clustering.EMD_clustering(t, X, max_IMF)
     EMD_modes = IMF.shape[0]
 
     plt.figure()
@@ -208,10 +210,10 @@ def EMD_example():
 
 if __name__ == "__main__":
     #Run examples 
-    # bispectrum_example()
+    bispectrum_example()
 
     # VMD_example()
 
     # EWT_example()
 
-    EMD_example()
+    # EMD_example()
