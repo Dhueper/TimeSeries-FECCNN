@@ -210,8 +210,19 @@ def EMD_example():
 
 def feature_extraction_example():
     [t, X] = test_function.sinusoidal_function()
+
     SP = feature_extraction.SPow(t,X)
     print("Spectral Power: SP=", SP)
+
+    SE = feature_extraction.SEnt(t,X)
+    print("Spectral Entropy: SE=", SE)
+
+    SP, fP = feature_extraction.SPeak(t,X)
+    print("Spectral Peak: SP=", SP)
+    print("Peak frequency: fP=", fP)
+
+    SC = feature_extraction.SCen(t,X)
+    print("Spectral Centroid: SC=", SC)
 
 
 if __name__ == "__main__":
