@@ -224,6 +224,10 @@ def feature_extraction_example():
     SC = feature_extraction.SCen(t,X)
     print("Spectral Centroid: SC=", SC)
 
+    AM, FM = feature_extraction.BW(t,X)
+    print("AM bandwidth: AM=", AM)
+    print("FM bandwidth: FM=", FM)
+
 
 if __name__ == "__main__":
     #Run examples 

@@ -1,5 +1,5 @@
 """ Feature extraction module"""
-from numpy import sum, log2, argmax
+from numpy import sum, log2, argmax, trapz, gradient, sqrt
 from scipy.signal import welch 
 
 def SPow(t,X):
@@ -30,7 +30,7 @@ def SEnt(t,X):
     f, Pxx = welch(X, f_sample)
 
     N = len(Pxx)
-    SE = - sum(Pxx * log2(Pxx)) / log2(N)
+    SE = - sum(Pxx * log2(Pxx + 1e-8)) / log2(N)
 
     return SE
 
@@ -65,3 +65,27 @@ def SCen(t,X):
     SC = sum(f * Pxx) / sum(Pxx)
 
     return SC
+
+def BW(t, X):
+    """Computes the AM and FM bandwidth of the signal.
+
+    Intent(in): Intent(in): t (numpy.array), timestamps;
+                X (numpy.array), time series.
+
+    Returns: AM (float), AM bandwidth of the timeseries;
+             FM (float), FM bandwidth of the timeseries.
+    """
+    f_sample = 1./(t[1]-t[0])
+    f, Pxx = welch(X, f_sample)
+
+    E = trapz(Pxx, x=f)
+
+    Xp = gradient(X, t[1]-t[0])
+
+    AM = sqrt(trapz(Xp**2., x=t) / E)
+
+    omega = trapz(Xp * X**2., x=t) / E
+
+    FM = sqrt(trapz((Xp - omega)**2. * X**2., x=t) / E)
+
+    return AM, FM
