@@ -1,6 +1,7 @@
 """ Feature extraction module"""
-from numpy import sum, log2, argmax, trapz, gradient, sqrt
+from numpy import sum, log2, argmax, trapz, gradient, sqrt, var
 from scipy.signal import welch 
+from scipy.stats import skew, kurtosis
 
 def SPow(t,X):
     """Computes the Spectral Power of the signal.
@@ -89,3 +90,54 @@ def BW(t, X):
     FM = sqrt(trapz((Xp - omega)**2. * X**2., x=t) / E)
 
     return AM, FM
+
+def Hjorth(t, X):
+    """Computes the variance, Hjorth mobility and Hjorth complexity of the signal.
+
+    Intent(in): Intent(in): t (numpy.array), timestamps;
+                X (numpy.array), time series.
+
+    Returns: V (float), Variance of the timeseries;
+             HM (float), Hjorth Mobility of the timeseries;
+             HC (float), Hjorth Complexity of the timeseries.
+    """
+
+    Xp = gradient(X, t[1]-t[0])
+    Xpp = gradient(Xp, t[1]-t[0])
+
+    V = var(X) # Variance 
+    Vp = var(Xp)
+    Vpp = var(Xpp)
+
+    HM = sqrt(Vp/V) # Hjorth Mobility
+    HMp = sqrt(Vpp/Vp)
+
+    HC =  HMp/HM # Hjorth Complexity 
+
+    return V, HM, HC
+
+def Skew(t, X):
+    """Computes the skewness of the signal.
+
+    Intent(in): Intent(in): t (numpy.array), timestamps;
+                X (numpy.array), time series.
+
+    Returns: SK (float), Skewness of the timeseries.
+    """
+
+    SK = skew(X)
+
+    return SK
+
+def Kurt(t, X):
+    """Computes the kurtosis of the signal.
+
+    Intent(in): Intent(in): t (numpy.array), timestamps;
+                X (numpy.array), time series.
+
+    Returns: KT (float), Kurtosis of the timeseries.
+    """
+
+    KT = kurtosis(X)
+
+    return KT
