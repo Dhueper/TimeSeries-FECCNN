@@ -211,33 +211,37 @@ def EMD_example():
 def feature_extraction_example():
     [t, X] = test_function.sinusoidal_function()
 
-    SPW = feature_extraction.SPow(t,X)
+    Features = feature_extraction.Features(t, X)
+
+    SPW = Features.SPow()
     print("Spectral Power: SPW=", SPW)
 
-    SE = feature_extraction.SEnt(t,X)
+    SE = Features.SEnt()
     print("Spectral Entropy: SE=", SE)
 
-    SP, fP = feature_extraction.SPeak(t,X)
+    SP, fP = Features.SPeak()
     print("Spectral Peak: SP=", SP)
     print("Peak frequency: fP=", fP)
 
-    SC = feature_extraction.SCen(t,X)
+    SC = Features.SCen()
     print("Spectral Centroid: SC=", SC)
 
-    AM, FM = feature_extraction.BW(t,X)
+    AM, FM = Features.BW()
     print("AM bandwidth: AM=", AM)
     print("FM bandwidth: FM=", FM)
 
-    V, HM, HC = feature_extraction.Hjorth(t,X)
+    V, HM, HC = Features.Hjorth()
     print("Variance: Var=", V)
     print("Hjorth Mobility: HM=", HM)
     print("Hjorth Complexity: HC=", HC)
 
-    SK = feature_extraction.Skew(t,X)
+    SK = Features.Skew()
     print("Skewness: SK=", SK)
 
-    KT = feature_extraction.Kurt(t,X)
+    KT = Features.Kurt()
     print("Kurtosis: KT=", KT)
+
+    # print(Features.fdict)
 
 
 if __name__ == "__main__":

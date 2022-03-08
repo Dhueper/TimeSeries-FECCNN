@@ -3,141 +3,151 @@ from numpy import sum, log2, argmax, trapz, gradient, sqrt, var
 from scipy.signal import welch 
 from scipy.stats import skew, kurtosis
 
-def SPow(t,X):
-    """Computes the Spectral Power of the signal.
+class Features():
+    def __init__(self, t, X):
+        """Computes different features of the signal.
 
-    Intent(in): Intent(in): t (numpy.array), timestamps;
-                X (numpy.array), time series.
+        Intent(in): Intent(in): t (numpy.array), timestamps;
+                    X (numpy.array), time series.
+        """
+        self.t = t
+        self.X = X
 
-    Returns: SP (float), Spectral Power of the timeseries.
-    """
-    f_sample = 1./(t[1]-t[0])
-    f, Pxx = welch(X, f_sample)
+        self.f_sample = 1./(t[1]-t[0])
+        self.f, self.Pxx = welch(self.X, self.f_sample)
+        self.N = len(self.Pxx)
 
-    N = len(Pxx)
-    SP = sum(Pxx)/N
+        self.Xp = gradient(self.X, self.t[1]-self.t[0])
 
-    return SP
+        self.fdict = {} 
 
-def SEnt(t,X):
-    """Computes the Spectral Entropy of the signal.
+    def SPow(self):
+        """Computes the Spectral Power of the signal.
 
-    Intent(in): Intent(in): t (numpy.array), timestamps;
-                X (numpy.array), time series.
+        Intent(in): self (object), class Features.
 
-    Returns: SE (float), Spectral Entropy of the timeseries.
-    """
-    f_sample = 1./(t[1]-t[0])
-    f, Pxx = welch(X, f_sample)
+        Returns: SPW (float), Spectral Power of the timeseries.
+        """
 
-    N = len(Pxx)
-    SE = - sum(Pxx * log2(Pxx + 1e-8)) / log2(N)
+        SPW = sum(self.Pxx)/self.N
+        self.fdict['SPW'] = SPW 
 
-    return SE
+        return SPW
 
-def SPeak(t,X):
-    """Computes the Spectral Peak of the signal and its asociated frequency.
+    def SEnt(self):
+        """Computes the Spectral Entropy of the signal.
 
-    Intent(in): Intent(in): t (numpy.array), timestamps;
-                X (numpy.array), time series.
+        Intent(in): self (object), class Features.
 
-    Returns: SP (float), Spectral Peak of the timeseries;
-             fP (float), Peak frequency.
-    """
-    f_sample = 1./(t[1]-t[0])
-    f, Pxx = welch(X, f_sample)
+        Returns: SE (float), Spectral Entropy of the timeseries.
+        """
 
-    SP = max(Pxx)
-    fP = f[argmax(Pxx)] 
+        SE = - sum(self.Pxx * log2(self.Pxx + 1e-8)) / log2(self.N)
+        self.fdict['SE'] = SE
 
-    return SP, fP
+        return SE
 
-def SCen(t,X):
-    """Computes the Spectral Centroid of the signal and its asociated frequency.
+    def SPeak(self):
+        """Computes the Spectral Peak of the signal and its asociated frequency.
 
-    Intent(in): Intent(in): t (numpy.array), timestamps;
-                X (numpy.array), time series.
+        Intent(in): self (object), class Features.
 
-    Returns: SC (float), Spectral Centroid of the timeseries.
-    """
-    f_sample = 1./(t[1]-t[0])
-    f, Pxx = welch(X, f_sample)
+        Returns: SP (float), Spectral Peak of the timeseries;
+                fP (float), Peak frequency.
+        """
 
-    SC = sum(f * Pxx) / sum(Pxx)
+        SP = max(self.Pxx)
+        fP = self.f[argmax(self.Pxx)] 
 
-    return SC
+        self.fdict['SP'] = SP
+        self.fdict['fP'] = fP
 
-def BW(t, X):
-    """Computes the AM and FM bandwidth of the signal.
+        return SP, fP
 
-    Intent(in): Intent(in): t (numpy.array), timestamps;
-                X (numpy.array), time series.
+    def SCen(self):
+        """Computes the Spectral Centroid of the signal and its asociated frequency.
 
-    Returns: AM (float), AM bandwidth of the timeseries;
-             FM (float), FM bandwidth of the timeseries.
-    """
-    f_sample = 1./(t[1]-t[0])
-    f, Pxx = welch(X, f_sample)
+        Intent(in): self (object), class Features.
 
-    E = trapz(Pxx, x=f)
+        Returns: SC (float), Spectral Centroid of the timeseries.
+        """
 
-    Xp = gradient(X, t[1]-t[0])
+        SC = sum(self.f * self.Pxx) / sum(self.Pxx)
+        self.fdict['SC'] = SC
 
-    AM = sqrt(trapz(Xp**2., x=t) / E)
+        return SC
 
-    omega = trapz(Xp * X**2., x=t) / E
+    def BW(self):
+        """Computes the AM and FM bandwidth of the signal.
 
-    FM = sqrt(trapz((Xp - omega)**2. * X**2., x=t) / E)
+        Intent(in): self (object), class Features.
 
-    return AM, FM
+        Returns: AM (float), AM bandwidth of the timeseries;
+                FM (float), FM bandwidth of the timeseries.
+        """
 
-def Hjorth(t, X):
-    """Computes the variance, Hjorth mobility and Hjorth complexity of the signal.
+        E = trapz(self.Pxx, x=self.f)
 
-    Intent(in): Intent(in): t (numpy.array), timestamps;
-                X (numpy.array), time series.
+        AM = sqrt(trapz(self.Xp**2., x=self.t) / E)
 
-    Returns: V (float), Variance of the timeseries;
-             HM (float), Hjorth Mobility of the timeseries;
-             HC (float), Hjorth Complexity of the timeseries.
-    """
+        omega = trapz(self.Xp * self.X**2., x=self.t) / E
 
-    Xp = gradient(X, t[1]-t[0])
-    Xpp = gradient(Xp, t[1]-t[0])
+        FM = sqrt(trapz((self.Xp - omega)**2. * self.X**2., x=self.t) / E)
 
-    V = var(X) # Variance 
-    Vp = var(Xp)
-    Vpp = var(Xpp)
+        self.fdict['AM'] = AM
+        self.fdict['FM'] = FM 
 
-    HM = sqrt(Vp/V) # Hjorth Mobility
-    HMp = sqrt(Vpp/Vp)
+        return AM, FM
 
-    HC =  HMp/HM # Hjorth Complexity 
+    def Hjorth(self):
+        """Computes the variance, Hjorth mobility and Hjorth complexity of the signal.
 
-    return V, HM, HC
+        Intent(in): self (object), class Features.
 
-def Skew(t, X):
-    """Computes the skewness of the signal.
+        Returns: V (float), Variance of the timeseries;
+                HM (float), Hjorth Mobility of the timeseries;
+                HC (float), Hjorth Complexity of the timeseries.
+        """
 
-    Intent(in): Intent(in): t (numpy.array), timestamps;
-                X (numpy.array), time series.
+        Xpp = gradient(self.Xp, self.t[1]-self.t[0])
 
-    Returns: SK (float), Skewness of the timeseries.
-    """
+        V = var(self.X) # Variance 
+        Vp = var(self.Xp)
+        Vpp = var(Xpp)
 
-    SK = skew(X)
+        HM = sqrt(Vp/V) # Hjorth Mobility
+        HMp = sqrt(Vpp/Vp)
 
-    return SK
+        HC =  HMp/HM # Hjorth Complexity 
 
-def Kurt(t, X):
-    """Computes the kurtosis of the signal.
+        self.fdict['Var'] = V 
+        self.fdict['HM'] = HM 
+        self.fdict['HC'] = HC 
 
-    Intent(in): Intent(in): t (numpy.array), timestamps;
-                X (numpy.array), time series.
+        return V, HM, HC
 
-    Returns: KT (float), Kurtosis of the timeseries.
-    """
+    def Skew(self):
+        """Computes the skewness of the signal.
 
-    KT = kurtosis(X)
+        Intent(in): self (object), class Features.
 
-    return KT
+        Returns: SK (float), Skewness of the timeseries.
+        """
+
+        SK = skew(self.X)
+        self.fdict['SK'] = SK 
+
+        return SK
+
+    def Kurt(self):
+        """Computes the kurtosis of the signal.
+
+        Intent(in): self (object), class Features.
+
+        Returns: KT (float), Kurtosis of the timeseries.
+        """
+
+        KT = kurtosis(self.X)
+        self.fdict['KT'] = KT 
+
+        return KT
