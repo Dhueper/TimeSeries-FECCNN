@@ -2,6 +2,7 @@ import os
 import sys
 
 from matplotlib import pyplot as plt
+from numpy import zeros, mean
 
 try:
     sys.path.insert(1, '/'.join(os.path.dirname(os.path.abspath(__file__)).split('/'))+'/sources')
@@ -254,4 +255,72 @@ if __name__ == "__main__":
 
     # EMD_example()
 
-    feature_extraction_example()
+    # feature_extraction_example()
+
+    [t, Xc] = test_function.read('data/Sanse/20220301.plt', 'W_Lights')
+    [t, Xg] = test_function.read('data/Sanse/20220301.plt', 'W_Gas_boiler')
+
+    for j in range(0,10):
+        for i in range(1,len(t)-1):
+            Xc[i] = (Xc[i-1] + 2*Xc[i] + Xc[i+1])/4. 
+            Xg[i] = (Xg[i-1] + 2*Xg[i] + Xg[i+1])/4. 
+
+    Y = Xc + Xg 
+
+    VMD_modes = 3
+    u = clustering.VMD_clustering(t, Y, VMD_modes)
+    if len(u[0,:]) < len(t):
+        t1 = zeros(len(u[0,:]))
+        t1[:] = t[:-1] 
+    else:
+        t1 = zeros(len(t))
+        t1[:] = t[:]   
+
+    bs = bispectrum.bispectral_transform(t, Xc)
+    plt.figure()
+    bs.plot_mag()
+    plt.title('Xc')
+    bs = bispectrum.bispectral_transform(t, Xg)
+    plt.figure()
+    bs.plot_mag()
+    plt.title('Xg')
+    bs = bispectrum.bispectral_transform(t1, u[0,:])
+    plt.figure()
+    bs.plot_mag()
+    plt.title('Mode 1')
+    bs = bispectrum.bispectral_transform(t1, u[1,:])
+    plt.figure()
+    bs.plot_mag()
+    plt.title('Mode 2')
+
+    plt.figure()
+    plt.title('Power [W]')
+    plt.subplot(2,1,1)
+    plt.plot(t,Xc,'b')
+    plt.xlabel('t')
+    plt.ylabel('W_computer')
+
+    plt.subplot(2,1,2)
+    plt.plot(t,Xg,'r')
+    plt.xlabel('t')
+    plt.ylabel('W_Gas_boiler')
+
+
+    plt.figure()
+    plt.plot(t,Y)
+    plt.xlabel('t')
+    plt.ylabel('W_both')
+    plt.title('Power [W]') 
+
+    
+
+    plt.figure()
+    plt.xlabel('t')
+    plt.ylabel('X (t)')
+    plt.title('VMD') 
+    for i in range(0, VMD_modes):
+        plt.subplot(VMD_modes, 1, i+1)
+        plt.plot(t1, u[i, :])
+
+    plt.show()
+

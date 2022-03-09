@@ -32,13 +32,36 @@ def sinusoidal_function():
 
     return [t,y] 
 
+def read(filename, name='W_General'): 
+  file = open(filename,'r')
+  N = len(file.readlines())
+#   N = 1000
+  file.seek(0)
+  time = zeros(N-1)
+  x = zeros(N-1)
+  vars = file.readline().split('=')[1].split(',')
+  index = vars.index(name)
+
+  for i in range(0,N-1):
+    line = array(file.readline().split(','))
+    time[i] = float(line[0])
+    x[i] = float(line[index])
+
+  file.close()
+  return time, x
+
 if __name__ == "__main__":
-    [t, X] = triangle_function()
+    name = 'W_Lights'
+    [t, X] = read('data/Sanse/20220301.plt', name)
+
+    for j in range(0,10):
+        for i in range(1,len(X)-1):
+            X[i] = (X[i-1] + 2*X[i] + X[i+1])/4. 
 
      #Plots
     plt.figure()
     plt.plot(t,X)
     plt.xlabel('t')
     plt.ylabel('X (t)')
-    plt.title('Test function') 
+    plt.title(name) 
     plt.show()
