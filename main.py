@@ -267,7 +267,7 @@ if __name__ == "__main__":
 
     Y = Xc + Xg 
 
-    VMD_modes = 3
+    VMD_modes = 2
     u = clustering.VMD_clustering(t, Y, VMD_modes)
     if len(u[0,:]) < len(t):
         t1 = zeros(len(u[0,:]))
