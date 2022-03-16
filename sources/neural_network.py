@@ -3,7 +3,7 @@ from keras.layers import Conv2D, Dense, MaxPooling2D, Dropout, Flatten
 from keras.utils import to_categorical
 from keras.datasets import mnist
 
-from numpy import load
+from numpy import load, argmax
 
 def CNN_model(input_shape, output_shape):
     model = Sequential()
@@ -21,7 +21,7 @@ def CNN_model(input_shape, output_shape):
     return model
 
 if __name__ == "__main__":
-    CNN = CNN_model((21,21,1), 7)
+    CNN = CNN_model((21,21,1), 5)
     # (X_train, y_train), (X_test, y_test) = mnist.load_data()
 
     # X_train = X_train.reshape(60000,28,28,1)
@@ -40,14 +40,26 @@ if __name__ == "__main__":
     X_test = load('ElectricDevices/X_test.npy')
     y_train = load('ElectricDevices/Y_train.npy')
     y_test = load('ElectricDevices/Y_test.npy')
-    X_eval = load('ElectricDevices/X_eval.npy')
 
     # print(X_train.shape)
     # print(y_train.shape)
     # print(X_test.shape)
     # print(y_test.shape)
 
-    CNN.fit(X_train, y_train, validation_data=(X_test, y_test), epochs=10, batch_size=32)
+    CNN.fit(X_train, y_train, validation_data=(X_test, y_test), epochs=20, batch_size=32)
 
-    prediction = CNN.predict(X_eval)
-    print(prediction)
+    tags = ['W_Air_cond','W_Computers','W_Audio_TV','W_Lights','W_Kitchen','W_Washing_m','W_Dish_w','W_Gas_boiler','W_Oven_vitro'] 
+    classes = {} 
+
+    for tag in tags:
+
+        X_eval = load('ElectricDevices/X_eval_'+tag+'.npy')
+
+        prediction = CNN.predict(X_eval)
+        print()
+        print(tag)
+        print(prediction)
+        print('tag=', argmax(prediction), argmax(prediction)%7 + 1)
+        classes[tag] =  argmax(prediction)%7 + 1
+
+    print(classes)

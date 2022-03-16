@@ -1,6 +1,17 @@
 #Test functions
-from numpy import pi, arccos, arcsin, sin, cos, sqrt, linspace, zeros, array, float32
+import sys
+import os
+
+from numpy import pi, arccos, arcsin, sin, cos, sqrt, linspace, zeros, array, float32, asfortranarray
 from matplotlib import pyplot as plt 
+from scipy.interpolate import interp1d
+
+try:
+    sys.path.insert(1, '/'.join(os.path.dirname(os.path.abspath(__file__)).split('/'))+'/sources')
+except:
+    sys.path.insert(1, '/'.join(os.path.dirname(os.path.abspath(__file__)).split('\\'))+'/sources')
+
+import fortran_ts
 
 def square_function():
     t = linspace(0,100,100)
@@ -68,25 +79,33 @@ def read_dataset(filename):
     return [X, Y] 
 
 if __name__ == "__main__":
-    # name = 'W_Lights'
-    # [t, X] = read('data/Sanse/20220301.plt', name)
+    name = 'W_Lights'
+    [t, X] = read('data/Sanse/20220301.plt', name)
 
-    # for j in range(0,10):
-    #     for i in range(1,len(X)-1):
-    #         X[i] = (X[i-1] + 2*X[i] + X[i+1])/4. 
+    #Noise Mean Value Filter
+    for _ in range(0,10):
+        X = fortran_ts.time_series.mvf(asfortranarray(X), 2)
+        X[0] = 2*X[1] - X[2] 
+        X[len(X)-1] = 2*X[len(X)-2] - X[len(X)-3] 
 
-    #  #Plots
-    # plt.figure()
-    # plt.plot(t,X)
-    # plt.xlabel('t')
-    # plt.ylabel('X (t)')
-    # plt.title(name) 
-    # plt.show()
+    f = interp1d(t*60, X, fill_value='extrapolate')
 
-    [X, Y] = read_dataset('ElectricDevices/ElectricDevices_TEST.txt') 
+    t95 = linspace(0, 24*60, 95)
+    X95 = f(t95)
+
+     #Plots
     plt.figure()
-    plt.plot(X[0,:])
+    plt.plot(t95,X95)
+    plt.xlabel('t')
+    plt.ylabel('X (t)')
+    plt.title(name) 
     plt.show()
-    print(len(X[0,:] ))
+    print(len(X95))
+
+    # [X, Y] = read_dataset('ElectricDevices/ElectricDevices_TEST.txt') 
+    # plt.figure()
+    # plt.plot(X[0,:])
+    # plt.show()
+    # print(len(X[0,:] ))
 
 
