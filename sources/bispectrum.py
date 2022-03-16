@@ -13,7 +13,7 @@ def bispectral_transform(t, X):
     Returns: bs (object), bispectrum of the time series.
     """
 
-    lc = lightcurve.Lightcurve(t,X, dt=t[1]-t[0])
+    lc = lightcurve.Lightcurve(t,X, dt=t[1]-t[0], skip_checks=True)
 
     bs = Bispectrum(lc, maxlag=10, window="uniform", scale="biased")
 

@@ -53,11 +53,11 @@ def read(filename, name='W_General'):
 def read_dataset(filename):
     file = open(filename,'r')
     N = len(file.readlines())
-    N = 3
+    # N = 100
     file.seek(0)
     Y = []
     X = []  
-    for i in range(0,N-1):
+    for i in range(0,N):
         line = file.readline().split('\n')[0].split('  ')
         Y.append(float(line[1].split(' ')[-1]))
         X.append(array(line[2:-1], dtype=float32))
