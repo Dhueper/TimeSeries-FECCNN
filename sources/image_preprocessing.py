@@ -29,11 +29,11 @@ def process_raw_dataset():
     Y_test = [] 
 
     for i in range(0, len(X[:,0])):
-        if Y[i] < 6: 
+        if Y[i] < 6 and Y[i]>1: 
             bs = bispectrum.bispectral_transform(t, X[i,:])
             bs.bispec_mag = bs.bispec_mag/linalg.norm(bs.bispec_mag)
             X_test.append(bs.bispec_mag)
-            Y_test.append(Y[i])
+            Y_test.append(Y[i]-1)
 
     X_test = array(X_test)
     X_test = X_test.reshape(len(X_test),21,21,1)
@@ -100,5 +100,5 @@ def process_signal(t, X):
     return [t95, X95] 
 
 if __name__ == "__main__":
-    # process_raw_dataset()
+    process_raw_dataset()
     # process_raw_data()
