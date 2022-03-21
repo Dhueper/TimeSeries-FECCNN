@@ -3,7 +3,8 @@ from keras.layers import Conv2D, Conv2DTranspose, Dense, MaxPooling2D, Dropout, 
 from keras.utils import to_categorical
 from keras.datasets import mnist
 
-from numpy import load, argmax, sum
+from numpy import load, argmax, sum, random, clip
+from matplotlib import pyplot as plt
 
 def CNN_model(input_shape, output_shape):
     model = Sequential()
@@ -20,7 +21,7 @@ def CNN_model(input_shape, output_shape):
 
     return model
 
-def autoencoder_model(input_shape, output_shape):
+def autoencoder_model(input_shape):
     model = Sequential()
     #Encoder 
     model.add(Conv2D(32, kernel_size=3, activation='relu', padding='same', input_shape=input_shape))
@@ -84,9 +85,75 @@ def run_CNN():
 
     print(classes)
 
+def preprocess(array):
+    """
+    Normalizes the supplied array and reshapes it into the appropriate format.
+    """
+
+    array = array.astype("float32") / 255.0
+    array = array.reshape(len(array), 28, 28, 1)
+    return array
+
+def noise(array):
+    """
+    Adds random noise to each image in the supplied array.
+    """
+
+    noise_factor = 0.4
+    noisy_array = array + noise_factor * random.normal(
+        loc=0.0, scale=1.0, size=array.shape
+    )
+
+    return clip(noisy_array, 0.0, 1.0)
+
+def display(array1, array2):
+    """
+    Displays ten random images from each one of the supplied arrays.
+    """
+
+    n = 10
+
+    indices = random.randint(len(array1), size=n)
+    images1 = array1[indices, :]
+    images2 = array2[indices, :]
+
+    plt.figure(figsize=(20, 4))
+    for i, (image1, image2) in enumerate(zip(images1, images2)):
+        ax = plt.subplot(2, n, i + 1)
+        plt.imshow(image1.reshape(28, 28))
+        plt.gray()
+        ax.get_xaxis().set_visible(False)
+        ax.get_yaxis().set_visible(False)
+
+        ax = plt.subplot(2, n, i + 1 + n)
+        plt.imshow(image2.reshape(28, 28))
+        plt.gray()
+        ax.get_xaxis().set_visible(False)
+        ax.get_yaxis().set_visible(False)
+
+    plt.show()
+
 if __name__ == "__main__":
     #CNN classification 
     # run_CNN
 
     #Autoencoder
-     
+
+    (X_train, _), (X_test, _) = mnist.load_data()
+    #preprocess 
+    X_train = preprocess(X_train)
+    X_test = preprocess(X_test)
+
+    noisy_X_train = noise(X_train)
+    noisy_X_test = noise(X_test)
+
+    display(X_train, noisy_X_train)
+
+    #Train the NN
+    autoencoder = autoencoder_model((28,28,1))
+
+    autoencoder.fit(noisy_X_train, X_train, validation_data=(noisy_X_test, X_test), epochs=10, batch_size=128, shuffle=True) 
+
+    predictions = autoencoder.predict(noisy_X_test)
+
+    display(noisy_X_test, predictions)
