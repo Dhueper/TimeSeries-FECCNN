@@ -1,5 +1,5 @@
 from keras.models import Sequential
-from keras.layers import Conv2D, Dense, MaxPooling2D, Dropout, Flatten
+from keras.layers import Conv2D, Conv2DTranspose, Dense, MaxPooling2D, Dropout, Flatten
 from keras.utils import to_categorical
 from keras.datasets import mnist
 
@@ -20,7 +20,24 @@ def CNN_model(input_shape, output_shape):
 
     return model
 
-if __name__ == "__main__":
+def autoencoder_model(input_shape, output_shape):
+    model = Sequential()
+    #Encoder 
+    model.add(Conv2D(32, kernel_size=3, activation='relu', padding='same', input_shape=input_shape))
+    model.add(MaxPooling2D(pool_size=(2,2), padding='same'))
+    model.add(Conv2D(32, kernel_size=3, activation='relu', padding='same'))
+    model.add(MaxPooling2D(pool_size=(2,2), padding='same'))
+
+    #Decoder
+    model.add(Conv2DTranspose(32, kernel_size=3, strides=2, activation='relu', padding='same')) 
+    model.add(Conv2DTranspose(32, kernel_size=3, strides=2, activation='relu', padding='same'))
+    model.add(Conv2D(1, kernel_size=3, activation='sigmoid', padding='same'))
+
+    model.compile(optimizer='adam', loss='binary_crossentropy', metrics=['accuracy'])
+
+    return model
+
+def run_CNN():
     N = 4
     CNN = CNN_model((21,21,1), N)
     # (X_train, y_train), (X_test, y_test) = mnist.load_data()
@@ -66,3 +83,10 @@ if __name__ == "__main__":
         # classes[tag] =  argmax(prediction)%N + 1
 
     print(classes)
+
+if __name__ == "__main__":
+    #CNN classification 
+    # run_CNN
+
+    #Autoencoder
+     
