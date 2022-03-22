@@ -25,13 +25,13 @@ def autoencoder_model(input_shape):
     model = Sequential()
     #Encoder 
     model.add(Conv2D(32, kernel_size=3, activation='relu', padding='same', input_shape=input_shape))
-    model.add(MaxPooling2D(pool_size=(2,2), padding='same'))
+    model.add(MaxPooling2D(pool_size=(3,3), padding='same'))
     model.add(Conv2D(32, kernel_size=3, activation='relu', padding='same'))
-    model.add(MaxPooling2D(pool_size=(2,2), padding='same'))
+    # model.add(MaxPooling2D(pool_size=(2,2), padding='same'))
 
     #Decoder
-    model.add(Conv2DTranspose(32, kernel_size=3, strides=2, activation='relu', padding='same')) 
-    model.add(Conv2DTranspose(32, kernel_size=3, strides=2, activation='relu', padding='same'))
+    model.add(Conv2DTranspose(32, kernel_size=3, strides=1, activation='relu', padding='same')) 
+    model.add(Conv2DTranspose(32, kernel_size=3, strides=3, activation='relu', padding='same'))
     model.add(Conv2D(1, kernel_size=3, activation='sigmoid', padding='same'))
 
     model.compile(optimizer='adam', loss='binary_crossentropy', metrics=['accuracy'])
@@ -117,16 +117,19 @@ def display(array1, array2):
     images1 = array1[indices, :]
     images2 = array2[indices, :]
 
+    size1 = array1.shape[1] 
+    size2 = array2.shape[1] 
+
     plt.figure(figsize=(20, 4))
     for i, (image1, image2) in enumerate(zip(images1, images2)):
         ax = plt.subplot(2, n, i + 1)
-        plt.imshow(image1.reshape(28, 28))
+        plt.imshow(image1.reshape(size1, size1))
         plt.gray()
         ax.get_xaxis().set_visible(False)
         ax.get_yaxis().set_visible(False)
 
         ax = plt.subplot(2, n, i + 1 + n)
-        plt.imshow(image2.reshape(28, 28))
+        plt.imshow(image2.reshape(size2, size2))
         plt.gray()
         ax.get_xaxis().set_visible(False)
         ax.get_yaxis().set_visible(False)
@@ -139,21 +142,36 @@ if __name__ == "__main__":
 
     #Autoencoder
 
-    (X_train, _), (X_test, _) = mnist.load_data()
-    #preprocess 
-    X_train = preprocess(X_train)
-    X_test = preprocess(X_test)
+    autoencoder = autoencoder_model((21,21,1))
 
-    noisy_X_train = noise(X_train)
-    noisy_X_test = noise(X_test)
+    autoencoder.summary()
 
-    display(X_train, noisy_X_train)
+    X_train = load('ElectricDevices/X_train_AE_W_Air_cond.npy')
+    Y_train = load('ElectricDevices/Y_train_AE_W_Air_cond.npy')
 
-    #Train the NN
-    autoencoder = autoencoder_model((28,28,1))
+    display(X_train, Y_train)
 
-    autoencoder.fit(noisy_X_train, X_train, validation_data=(noisy_X_test, X_test), epochs=10, batch_size=128, shuffle=True) 
+    autoencoder.fit(X_train, Y_train, validation_split=0.2, epochs=200, batch_size=8, shuffle=True)
 
-    predictions = autoencoder.predict(noisy_X_test)
+    predictions = autoencoder.predict(X_train[0:10,:,:,:])
 
-    display(noisy_X_test, predictions)
+    display(Y_train[0:10,:,:,:], predictions)
+
+    # (X_train, _), (X_test, _) = mnist.load_data()
+    # #preprocess 
+    # X_train = preprocess(X_train)
+    # X_test = preprocess(X_test)
+
+    # noisy_X_train = noise(X_train)
+    # noisy_X_test = noise(X_test)
+
+    # display(X_train, noisy_X_train)
+
+    # #Train the NN
+    # autoencoder = autoencoder_model((28,28,1))
+
+    # autoencoder.fit(noisy_X_train, X_train, validation_data=(noisy_X_test, X_test), epochs=10, batch_size=128, shuffle=True) 
+
+    # predictions = autoencoder.predict(noisy_X_test)
+
+    # display(noisy_X_test, predictions)

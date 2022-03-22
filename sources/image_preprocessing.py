@@ -82,7 +82,54 @@ def process_raw_data():
 
     print('t=', tf-t0)
 
-   
+def process_autoencoder_data():
+    t0 = time.time()
+
+    tags = ['W_Air_cond','W_Computers','W_Audio_TV','W_Lights','W_Kitchen','W_Washing_m','W_Dish_w','W_Gas_boiler','W_Oven_vitro'] 
+    tags1 = ['W_Air_cond', 'W_Computers'] 
+    key_tag = 'W_Air_cond'
+    X_test = []
+    Y_test = [] 
+    for i in range(1,9):
+        for tag1 in tags1:
+            [t, X] = test_function.read('data/Sanse/2022030'+str(i)+'.plt', tag1) 
+
+            [t1_95, X1_95] = process_signal(t, X) 
+
+            bs1 = bispectrum.bispectral_transform(t1_95, X1_95)
+            bs1.bispec_mag = bs1.bispec_mag/linalg.norm(bs1.bispec_mag)
+
+            for tag2 in tags:
+                if tag2 != key_tag and tag2 != tag1:
+                    [t, X] = test_function.read('data/Sanse/2022030'+str(i)+'.plt', tag2) 
+
+                    [t2_95, X2_95] = process_signal(t, X) 
+
+                    X95 = X1_95 + X2_95
+
+                    bs = bispectrum.bispectral_transform(t1_95, X95)
+                    bs.bispec_mag = bs.bispec_mag/linalg.norm(bs.bispec_mag)
+
+                    X_test.append(bs.bispec_mag)
+                    if tag1 == key_tag:
+                        Y_test.append(bs1.bispec_mag)
+                    else:
+                        Y_test.append(zeros((21,21)))
+
+    X_test = array(X_test)
+    Y_test = array(Y_test)
+    X_test = X_test.reshape(len(X_test), 21, 21, 1)
+    Y_test = Y_test.reshape(len(Y_test), 21, 21, 1)
+
+    print(X_test.shape)
+    print(Y_test.shape)
+
+    save('ElectricDevices/X_train_AE_'+key_tag+'.npy', X_test)
+    save('ElectricDevices/Y_train_AE_'+key_tag+'.npy', Y_test)
+
+    tf = time.time()
+
+    print('t=', tf-t0)
 
 def process_signal(t, X):
     #Noise Mean Value Filter
@@ -100,5 +147,6 @@ def process_signal(t, X):
     return [t95, X95] 
 
 if __name__ == "__main__":
-    process_raw_dataset()
+    # process_raw_dataset()
     # process_raw_data()
+    process_autoencoder_data()
