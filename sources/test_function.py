@@ -26,6 +26,34 @@ def square_function():
 
     return [t,y] 
 
+def square_function2():
+    t = linspace(0,100,1000)
+    y = zeros(len(t))
+    for i in range(0,int(len(t)/10)):
+        if i%2 == 1:
+            for j in range(0,10):
+                y[10*i+j] = 2
+
+        else:
+            for j in range(0,10):
+                y[10*i+j] = -2
+
+    return [t,y]
+
+def square_function3():
+    t = linspace(0,100,1000)
+    y = zeros(len(t))
+    for i in range(0,int(len(t)/5)):
+        if i%2 == 1:
+            for j in range(0,5):
+                y[5*i+j] = 1
+
+        else:
+            for j in range(0,10):
+                y[5*i+j] = -1
+
+    return [t,y]
+
 def triangle_function():
     t = linspace(0,100,100)
     y = zeros(len(t))
@@ -79,28 +107,37 @@ def read_dataset(filename):
     return [X, Y] 
 
 if __name__ == "__main__":
-    name = 'W_Lights'
-    [t, X] = read('data/Sanse/20220301.plt', name)
 
-    #Noise Mean Value Filter
-    for _ in range(0,10):
-        X = fortran_ts.time_series.mvf(asfortranarray(X), 2)
-        X[0] = 2*X[1] - X[2] 
-        X[len(X)-1] = 2*X[len(X)-2] - X[len(X)-3] 
+    [t, X] = square_function3() 
+    [t, Y] = square_function2() 
+    Z = X + Y
 
-    f = interp1d(t*60, X, fill_value='extrapolate')
-
-    t95 = linspace(0, 24*60, 95)
-    X95 = f(t95)
-
-     #Plots
     plt.figure()
-    plt.plot(t95,X95)
-    plt.xlabel('t')
-    plt.ylabel('X (t)')
-    plt.title(name) 
-    plt.show()
-    print(len(X95))
+    plt.plot(t, Z)
+    plt.show() 
+
+    # name = 'W_Lights'
+    # [t, X] = read('data/Sanse/20220301.plt', name)
+
+    # #Noise Mean Value Filter
+    # for _ in range(0,10):
+    #     X = fortran_ts.time_series.mvf(asfortranarray(X), 2)
+    #     X[0] = 2*X[1] - X[2] 
+    #     X[len(X)-1] = 2*X[len(X)-2] - X[len(X)-3] 
+
+    # f = interp1d(t*60, X, fill_value='extrapolate')
+
+    # t95 = linspace(0, 24*60, 95)
+    # X95 = f(t95)
+
+    #  #Plots
+    # plt.figure()
+    # plt.plot(t95,X95)
+    # plt.xlabel('t')
+    # plt.ylabel('X (t)')
+    # plt.title(name) 
+    # plt.show()
+    # print(len(X95))
 
     # [X, Y] = read_dataset('ElectricDevices/ElectricDevices_TEST.txt') 
     # plt.figure()

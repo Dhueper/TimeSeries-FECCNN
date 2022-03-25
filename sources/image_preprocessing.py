@@ -82,11 +82,57 @@ def process_raw_data():
 
     print('t=', tf-t0)
 
+def process_autoencoder_dataset():
+    t0 = time.time()
+    tag = 2
+
+    [X, Y] = test_function.read_dataset('ElectricDevices/ElectricDevices_TEST.txt') 
+
+    t = linspace(0, 24*60, len(X[0,:]))
+
+    X_test = [] 
+    Y_test = [] 
+    ct = 0
+    for i in range(0, len(X[:,0])):
+        if Y[i] == tag:
+            X1 = X[i,:]
+            bs1 = bispectrum.bispectral_transform(t, X1)
+            bs1.bispec_mag = bs1.bispec_mag/linalg.norm(bs1.bispec_mag)
+            for j in range(0, len(X[:,0])):
+                if Y[j] == tag+1:
+                    X2 = X[j,:]
+                    X_total = X1 + X2
+                    bs = bispectrum.bispectral_transform(t, X_total)
+                    bs.bispec_mag = bs.bispec_mag/linalg.norm(bs.bispec_mag)
+                    X_test.append(bs.bispec_mag)
+                    Y_test.append(bs1.bispec_mag)
+                    ct += 1
+                if ct >= 10000:
+                    break
+        if ct >= 10000:
+                    break
+
+
+    X_test = array(X_test)
+    Y_test = array(Y_test)
+    X_test = X_test.reshape(len(X_test), 21, 21, 1)
+    Y_test = Y_test.reshape(len(Y_test), 21, 21, 1)
+
+    print(X_test.shape)
+    print(Y_test.shape)
+
+    save('ElectricDevices/X_test_AE_'+str(tag)+'.npy', X_test)
+    save('ElectricDevices/Y_test_AE_'+str(tag)+'.npy', Y_test)
+
+    tf = time.time()
+
+    print('t=', tf-t0)
+
 def process_autoencoder_data():
     t0 = time.time()
 
     tags = ['W_Air_cond','W_Computers','W_Audio_TV','W_Lights','W_Kitchen','W_Washing_m','W_Dish_w','W_Gas_boiler','W_Oven_vitro'] 
-    tags1 = ['W_Air_cond', 'W_Computers'] 
+    tags1 = ['W_Air_cond'] 
     key_tag = 'W_Air_cond'
     X_test = []
     Y_test = [] 
@@ -124,8 +170,8 @@ def process_autoencoder_data():
     print(X_test.shape)
     print(Y_test.shape)
 
-    save('ElectricDevices/X_train_AE_'+key_tag+'.npy', X_test)
-    save('ElectricDevices/Y_train_AE_'+key_tag+'.npy', Y_test)
+    # save('ElectricDevices/X_train_AE_'+key_tag+'.npy', X_test)
+    # save('ElectricDevices/Y_train_AE_'+key_tag+'.npy', Y_test)
 
     tf = time.time()
 
@@ -149,4 +195,5 @@ def process_signal(t, X):
 if __name__ == "__main__":
     # process_raw_dataset()
     # process_raw_data()
-    process_autoencoder_data()
+    # process_autoencoder_data()
+    process_autoencoder_dataset()

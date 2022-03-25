@@ -34,7 +34,7 @@ def autoencoder_model(input_shape):
     model.add(Conv2DTranspose(32, kernel_size=3, strides=3, activation='relu', padding='same'))
     model.add(Conv2D(1, kernel_size=3, activation='sigmoid', padding='same'))
 
-    model.compile(optimizer='adam', loss='binary_crossentropy', metrics=['accuracy'])
+    model.compile(optimizer='adam', loss='binary_crossentropy')
 
     return model
 
@@ -146,16 +146,23 @@ if __name__ == "__main__":
 
     autoencoder.summary()
 
-    X_train = load('ElectricDevices/X_train_AE_W_Air_cond.npy')
-    Y_train = load('ElectricDevices/Y_train_AE_W_Air_cond.npy')
+    X_train = load('ElectricDevices/X_train_AE_2.npy')
+    Y_train = load('ElectricDevices/Y_train_AE_2.npy')
+    X_test = load('ElectricDevices/X_test_AE_2.npy')
+    Y_test = load('ElectricDevices/Y_test_AE_2.npy')
 
     display(X_train, Y_train)
 
-    autoencoder.fit(X_train, Y_train, validation_split=0.2, epochs=200, batch_size=8, shuffle=True)
+    # autoencoder.fit(X_train, Y_train, validation_split=0.2, epochs=200, batch_size=8, shuffle=True)
+    autoencoder.fit(X_train, Y_train, validation_data=(X_test, Y_test), epochs=100, batch_size=128, shuffle=True)
 
-    predictions = autoencoder.predict(X_train[0:10,:,:,:])
+    # predictions = autoencoder.predict(X_train[:,:,:,:])
 
-    display(Y_train[0:10,:,:,:], predictions)
+    # display(Y_train[:,:,:,:], predictions)
+
+    predictions = autoencoder.predict(X_test)
+
+    display(Y_test, predictions)
 
     # (X_train, _), (X_test, _) = mnist.load_data()
     # #preprocess 

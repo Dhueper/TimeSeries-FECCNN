@@ -91,8 +91,8 @@ def VMD_example():
 
 
     #Square + triangle functions 
-    [t, X] = test_function.square_function()
-    [t, Y] = test_function.triangle_function()
+    [t, X] = test_function.square_function3()
+    [t, Y] = test_function.square_function2()
 
     plt.figure()
     plt.plot(t,X+Y)
@@ -139,8 +139,8 @@ def EWT_example():
 
 
     #Square + triangle functions 
-    [t, X] = test_function.square_function()
-    [t, Y] = test_function.triangle_function()
+    [t, X] = test_function.square_function3()
+    [t, Y] = test_function.square_function2()
 
     plt.figure()
     plt.plot(t,X+Y)
@@ -188,8 +188,8 @@ def EMD_example():
 
 
     #Square + triangle functions 
-    [t, X] = test_function.square_function()
-    [t, Y] = test_function.triangle_function()
+    [t, X] = test_function.square_function3()
+    [t, Y] = test_function.square_function2()
 
     plt.figure()
     plt.plot(t,X+Y)
@@ -251,7 +251,7 @@ if __name__ == "__main__":
     #Run examples 
     # bispectrum_example()
 
-    # VMD_example()
+    VMD_example()
 
     # EWT_example()
 
@@ -261,30 +261,30 @@ if __name__ == "__main__":
 
 
     #Data processing
-    name = 'W_Lights'
-    [t, X] = test_function.read('data/Sanse/20220301.plt', name)
+    # name = 'W_Lights'
+    # [t, X] = test_function.read('data/Sanse/20220301.plt', name)
 
-    #Noise Mean Value Filter
-    for _ in range(0,10):
-        X = fortran_ts.time_series.mvf(asfortranarray(X), 2)
-        X[0] = 2*X[1] - X[2] 
-        X[len(X)-1] = 2*X[len(X)-2] - X[len(X)-3] 
+    # #Noise Mean Value Filter
+    # for _ in range(0,10):
+    #     X = fortran_ts.time_series.mvf(asfortranarray(X), 2)
+    #     X[0] = 2*X[1] - X[2] 
+    #     X[len(X)-1] = 2*X[len(X)-2] - X[len(X)-3] 
 
-    f = interp1d(t*60, X, fill_value='extrapolate')
+    # f = interp1d(t*60, X, fill_value='extrapolate')
 
-    t95 = linspace(0, 24*60, 95)
-    X95 = f(t95)
+    # t95 = linspace(0, 24*60, 95)
+    # X95 = f(t95)
 
-    bs = bispectrum.bispectral_transform(t, X)
+    # bs = bispectrum.bispectral_transform(t, X)
 
-    plt.figure()
-    bs.plot_mag()
+    # plt.figure()
+    # bs.plot_mag()
 
-    bs95 = bispectrum.bispectral_transform(t95, X95)
+    # bs95 = bispectrum.bispectral_transform(t95, X95)
 
-    plt.figure()
-    bs95.plot_mag()
-    plt.show()
+    # plt.figure()
+    # bs95.plot_mag()
+    # plt.show()
 
 
  
