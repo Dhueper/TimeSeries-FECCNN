@@ -2,7 +2,7 @@ import os
 import sys
 
 from matplotlib import pyplot as plt
-from numpy import zeros, ones, mean, asfortranarray, linspace, pi, amax, array, append, trapz, dot
+from numpy import zeros, ones, mean, asfortranarray, linspace, pi, amax, array, append, trapz, dot, log2
 from scipy.fft import fft, fftfreq, ifft
 from scipy.interpolate import interp1d
 from mpmath import quadgl
@@ -60,7 +60,7 @@ def rectangular_transform(X, dx_spec, alpha, beta):
     for i in range(0, N):
         X_aux.append(X[i])
         #Looking for discontinuities 
-        if abs(dx_spec[i]) > alpha and len(X_aux)>=int(beta):
+        if abs(dx_spec[i]) > alpha and len(X_aux)>=int(beta*N):
             X_rect = append(X_rect, ones(len(X_aux))*mean(array(X_aux)))
             X_aux = []
     if len(X_aux)>0:
@@ -115,6 +115,7 @@ def haar_coef(t, X, order):
 if __name__ == "__main__":
     name = 'W_Lights'
     [t0, X] = test_function.read('data/Sanse/20220301.plt', name) 
+    t0 = t0 / amax(t0)
     Z = zeros(len(X))
     Z[:] = X[:]  
     #Mean value filter 
@@ -138,38 +139,62 @@ if __name__ == "__main__":
     # plt.show()
 
     alpha = 0.15 #Discontinuity threshold 
-    beta = 2**6 #Length threshold in points
+    beta = 2**(-7) #Length threshold 
     Y_rect = rectangular_transform(Y, dy_spec, alpha, beta)
 
-    plt.figure()
-    plt.plot(t0, X, 'g')
-    plt.plot(t, Y, 'b')
-    plt.plot(t, Y_rect, 'r')
-    plt.xlabel('t [h]')
-    plt.ylabel('P [W]')
-    plt.title('Power consumption')
-    # plt.show()
-
-    t_test = linspace(0, 1, 4)
-    X_test = array([9., 7., 3., 5.])
-    order = 4
-    c_haar = haar_coef(t_test, X_test, order)
-    print(c_haar)
-    N = len(X_test)
-    Y_test = ones(N)
+    #Haar series expansion
+    order =  int(log2(beta**(-1))) 
+    # order = 7
+    c_haar = haar_coef(t, Y_rect, order)
+    N = len(t)
     c = zeros(N)
-    c0 = zeros(N)
-    c_phi0 = zeros(N)
-    Y_test = Y_test * mean(X_test) 
+    Y_haar = ones(N)
+    Y_haar = Y_haar * mean(Y_rect) 
 
     for m in range(0, order):
         for n in range(0, 2**m):
             for i in range(0, N):
-                c[i] = phi(t_test[i], m, n) * c_haar[m][n]  
-            Y_test  = Y_test + c 
-    Y_test = Y_test / 2**(order-2)
+                c[i] = phi(t[i], m, n) * c_haar[m][n]  
+            Y_haar  = Y_haar + c 
+    # Y_haar = Y_haar / 2**(order-2)
 
-    print(Y_test)
+    plt.figure()
+    plt.plot(t0, X, 'g')
+    plt.plot(t, Y, 'c')
+    plt.plot(t, Y_rect, 'r')
+    plt.plot(t, Y_haar, 'b')
+    plt.xlabel('t [h]')
+    plt.ylabel('P [W]')
+    plt.title('Power consumption')
+    plt.show()
+
+    N_coef = sum(array([2**i for i in range(0,order)])) + 1
+    print('Rectangular signal:', len(Y_rect), 'points')
+    print('Haar signal:', N_coef, 'coefficients')
+
+
+
+
+    # t_test = linspace(0, 1, 4)
+    # X_test = array([9., 7., 3., 5.])
+    # order = 4
+    # c_haar = haar_coef(t_test, X_test, order)
+    # print(c_haar)
+    # N = len(X_test)
+    # Y_test = ones(N)
+    # c = zeros(N)
+    # c0 = zeros(N)
+    # c_phi0 = zeros(N)
+    # Y_test = Y_test * mean(X_test) 
+
+    # for m in range(0, order):
+    #     for n in range(0, 2**m):
+    #         for i in range(0, N):
+    #             c[i] = phi(t_test[i], m, n) * c_haar[m][n]  
+    #         Y_test  = Y_test + c 
+    # Y_test = Y_test / 2**(order-2)
+
+    # print(Y_test)
 
 
 
