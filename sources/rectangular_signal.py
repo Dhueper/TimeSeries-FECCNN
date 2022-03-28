@@ -2,9 +2,10 @@ import os
 import sys
 
 from matplotlib import pyplot as plt
-from numpy import zeros, ones, mean, asfortranarray, linspace, pi, amax, array, append
+from numpy import zeros, ones, mean, asfortranarray, linspace, pi, amax, array, append, trapz, dot
 from scipy.fft import fft, fftfreq, ifft
 from scipy.interpolate import interp1d
+from mpmath import quadgl
 
 try:
     sys.path.insert(1, '/'.join(os.path.dirname(os.path.abspath(__file__)).split('/'))+'/sources')
@@ -15,8 +16,14 @@ import test_function
 import fortran_ts
 
 def reshape_2pow(t, X):
+    """Reshape to fit a power of 2.
+
+    Input: t (numpy.array), timestamps;
+           X (numpy.array), time series.
+
+    Returns: [t_k, X_k] (numpy.array), reshaped series.
+    """
     N = len(X)
-    #Reshape to fit a power of 2. 
     for k in range(0, 1000):
         if 2**k > N:
             break
@@ -53,7 +60,7 @@ def rectangular_transform(X, dx_spec, alpha, beta):
     for i in range(0, N):
         X_aux.append(X[i])
         #Looking for discontinuities 
-        if abs(dx_spec[i]) > alpha and len(X_aux)>int(N*beta):
+        if abs(dx_spec[i]) > alpha and len(X_aux)>=int(beta):
             X_rect = append(X_rect, ones(len(X_aux))*mean(array(X_aux)))
             X_aux = []
     if len(X_aux)>0:
@@ -70,37 +77,54 @@ def phi(t, m, n):
 
     Returns: phi (float), Haar function value.
     """
+
     def psi(t):
         if 0 <= t and t < 0.5:
             return 1
-        elif 0.5 <= t and t < 1:
+        elif 0.5 <= t and t <= 1:
             return -1
         else:
             return 0
 
-    return 2**(-m) * psi(2**(-m) * t - n)
+    return 2**(m/2.) * psi(2**(m) * t - n)
 
 def haar_coef(t, X, order):
-    N = len(t)
-    for k in range(0, 1000):
-        if 2**k > N:
-            break
-    t_k = linspace(0,24,2**(k-1))
-    f = interp1d(t, X, fill_value='extrapolate')
-    X_k = f(t_k)
-    
-    return [t_k, X_k] 
+    """Extracts the coeffcients of the Haar series expansion.
+
+    Input: t (numpy.array), timestamps;
+           X (numpy.array), time series;
+           order (int), maximum order of the coefficients.
+
+    Returns: c_haar (list), Haar series coefficients.
+    """
+    t1 = t/amax(t)
+    N = len(t1)
+    haar_func = zeros(N)
+    c_haar = [] 
+    for m in range(0, order):
+        c_haar.append([])
+        for n in range(0, 2**m):
+            for i in range(0, N):
+                haar_func[i] = phi(t1[i], m, n) 
+            # c_haar[m].append(trapz(X*haar_func, t1))
+            c_haar[m].append(dot(X,haar_func)/N)
+
+    return c_haar
+
 
 if __name__ == "__main__":
     name = 'W_Lights'
-    [t0, X] = test_function.read('data/Sanse/20220301.plt', name)
-    [t, Y] = reshape_2pow(t0, X)  
+    [t0, X] = test_function.read('data/Sanse/20220301.plt', name) 
+    Z = zeros(len(X))
+    Z[:] = X[:]  
     #Mean value filter 
     for _ in range(0,50):
-        Y = fortran_ts.time_series.mvf(asfortranarray(Y), 1)
+        Z = fortran_ts.time_series.mvf(asfortranarray(Z), 1)
         # Y[0] = 2*Y[1] - Y[2] 
         # Y[len(Y)-1] = 2*Y[len(Y)-2] - Y[len(Y)-3]
 
+    #Reshape to fit a power of 2. 
+    [t, Y] = reshape_2pow(t0, Z) 
 
     # dx_spec = spectral_derivative(t, X)
     dy_spec = spectral_derivative(t, Y)
@@ -114,20 +138,39 @@ if __name__ == "__main__":
     # plt.show()
 
     alpha = 0.15 #Discontinuity threshold 
-    beta = 1./400 #Length threshold 
+    beta = 2**6 #Length threshold in points
     Y_rect = rectangular_transform(Y, dy_spec, alpha, beta)
-
-    # X_k  = haar_coef(t, Y_rect, 2)
 
     plt.figure()
     plt.plot(t0, X, 'g')
     plt.plot(t, Y, 'b')
     plt.plot(t, Y_rect, 'r')
-    # plt.plot(t_rect, X_k)
     plt.xlabel('t [h]')
     plt.ylabel('P [W]')
     plt.title('Power consumption')
-    plt.show()
+    # plt.show()
+
+    t_test = linspace(0, 1, 4)
+    X_test = array([9., 7., 3., 5.])
+    order = 4
+    c_haar = haar_coef(t_test, X_test, order)
+    print(c_haar)
+    N = len(X_test)
+    Y_test = ones(N)
+    c = zeros(N)
+    c0 = zeros(N)
+    c_phi0 = zeros(N)
+    Y_test = Y_test * mean(X_test) 
+
+    for m in range(0, order):
+        for n in range(0, 2**m):
+            for i in range(0, N):
+                c[i] = phi(t_test[i], m, n) * c_haar[m][n]  
+            Y_test  = Y_test + c 
+    Y_test = Y_test / 2**(order-2)
+
+    print(Y_test)
+
 
 
    
