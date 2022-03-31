@@ -27,7 +27,7 @@ def reshape_2pow(t, X):
     for k in range(0, 1000):
         if 2**k > N:
             break
-    t_k = linspace(0,amax(t),2**(k-1)) 
+    t_k = linspace(0,amax(t),2**(k)) 
     f = interp1d(t, X, fill_value='extrapolate')
     X_k = f(t_k)
     return [t_k, X_k]  
@@ -113,16 +113,18 @@ def haar_coef(t, X, order):
 
 
 if __name__ == "__main__":
-    name = 'W_Lights'
+    # name = 'W_Lights'
+    # name = 'W_Computers'
+    name = 'W_Gas_boiler'
     [t0, X] = test_function.read('data/Sanse/20220301.plt', name) 
     t0 = t0 / amax(t0)
     Z = zeros(len(X))
     Z[:] = X[:]  
     #Mean value filter 
     for _ in range(0,50):
-        Z = fortran_ts.time_series.mvf(asfortranarray(Z), 1)
-        # Y[0] = 2*Y[1] - Y[2] 
-        # Y[len(Y)-1] = 2*Y[len(Y)-2] - Y[len(Y)-3]
+        Z = fortran_ts.time_series.mvf(asfortranarray(Z), 0)
+        # Z[0] = 2*Z[1] - Z[2] 
+        # Z[len(Z)-1] = 2*Z[len(Z)-2] - Z[len(Z)-3]
 
     #Reshape to fit a power of 2. 
     [t, Y] = reshape_2pow(t0, Z) 
@@ -138,18 +140,18 @@ if __name__ == "__main__":
     plt.title('Spectral derivative')
     # plt.show()
 
-    alpha = 0.15 #Discontinuity threshold 
-    beta = 2**(-7) #Length threshold 
+    alpha = 0.05 #Discontinuity threshold 
+    beta = 2**(-6) #Length threshold 
     Y_rect = rectangular_transform(Y, dy_spec, alpha, beta)
 
     #Haar series expansion
     order =  int(log2(beta**(-1))) 
     # order = 7
-    c_haar = haar_coef(t, Y_rect, order)
+    c_haar = haar_coef(t, Y, order)
     N = len(t)
     c = zeros(N)
     Y_haar = ones(N)
-    Y_haar = Y_haar * mean(Y_rect) 
+    Y_haar = Y_haar * mean(Y) 
 
     for m in range(0, order):
         for n in range(0, 2**m):
