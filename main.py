@@ -17,6 +17,7 @@ import bispectrum
 import clustering
 import feature_extraction
 import rectangular_signal
+import haar
 import fortran_ts
 
 #%%Bispectrum 
@@ -328,6 +329,9 @@ if __name__ == "__main__":
     #Solve linear system
     x = lstsq(signal_coef, general_coef, rcond=None)[0]
     print(x)  
+
+    #Haar transform
+ 
 
 
     # VMD clustering 
