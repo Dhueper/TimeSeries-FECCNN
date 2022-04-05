@@ -2,7 +2,9 @@ import os
 import sys
 
 from matplotlib import pyplot as plt
-from numpy import zeros, mean, asfortranarray, linspace
+from numpy import zeros, mean, asfortranarray, linspace, amax, ones, sum, array, transpose
+from numpy.linalg import lstsq
+from numpy import random
 from scipy.interpolate import interp1d
 
 try:
@@ -14,6 +16,7 @@ import test_function
 import bispectrum
 import clustering
 import feature_extraction
+import rectangular_signal
 import fortran_ts
 
 #%%Bispectrum 
@@ -251,7 +254,7 @@ if __name__ == "__main__":
     #Run examples 
     # bispectrum_example()
 
-    VMD_example()
+    # VMD_example()
 
     # EWT_example()
 
@@ -259,94 +262,77 @@ if __name__ == "__main__":
 
     # feature_extraction_example()
 
+    signal = [] 
+    signal_coef = [] 
+    name_list = {'W_Computers':4, 'W_Lights':4, 'W_Gas_boiler':4} 
+    ct = 0
+    for name in name_list.keys():
+        [t0, X] = test_function.read('data/Sanse/20220301.plt', name) 
+        t0 = t0 / amax(t0)
+        Z = zeros(len(X))
+        Z[:] = X[:]  
+        #Mean value filter 
+        for _ in range(0,50):
+            Z = fortran_ts.time_series.mvf(asfortranarray(Z), 0)
 
-    #Data processing
-    # name = 'W_Lights'
-    # [t, X] = test_function.read('data/Sanse/20220301.plt', name)
+        #Reshape to fit a power of 2. 
+        [t, Y] = rectangular_signal.reshape_2pow(t0, Z) 
 
-    # #Noise Mean Value Filter
-    # for _ in range(0,10):
-    #     X = fortran_ts.time_series.mvf(asfortranarray(X), 2)
-    #     X[0] = 2*X[1] - X[2] 
-    #     X[len(X)-1] = 2*X[len(X)-2] - X[len(X)-3] 
+        #Haar series expansion
+        order = name_list[name] 
+        c_haar = rectangular_signal.haar_coef(t, Y, order)
+        N = len(t)
+        c = zeros(N)
+        Y_haar = ones(N)
+        Y_haar = Y_haar * mean(Y) 
 
-    # f = interp1d(t*60, X, fill_value='extrapolate')
+        signal_coef.append([])
+        signal_coef[ct].append(mean(Y))
 
-    # t95 = linspace(0, 24*60, 95)
-    # X95 = f(t95)
+        for m in range(0, order):
+            for n in range(0, 2**m):
+                for i in range(0, N):
+                    c[i] = rectangular_signal.phi(t[i], m, n) * c_haar[m][n]  
+                signal_coef[ct].append(c_haar[m][n]) 
+                Y_haar  = Y_haar + c 
 
-    # bs = bispectrum.bispectral_transform(t, X)
+        N_coef = sum(array([2**i for i in range(0,order)])) + 1
+        print('Reshaped signal:', len(Y), 'points')
+        print('Haar signal:', N_coef, 'coefficients')
+        noise = random.normal(0, 0.1*amax(Y_haar), len(Y_haar))
+        Y_haar = Y_haar + noise
+        signal.append(Y_haar)
+        ct += 1
 
-    # plt.figure()
-    # bs.plot_mag()
+        plt.figure()
+        plt.plot(t0, X, 'g')
+        plt.plot(t, Y, 'c')
+        plt.plot(t, Y_haar, 'b')
+        plt.xlabel('t [h]')
+        plt.ylabel('P [W]')
+        plt.title('Power consumption' + name)
+        # plt.show()
 
-    # bs95 = bispectrum.bispectral_transform(t95, X95)
+    signal_coef = transpose(array(signal_coef))
+    print(type(signal_coef), signal_coef.shape)
 
-    # plt.figure()
-    # bs95.plot_mag()
-    # plt.show()
+    general = 0.4*signal[0] + 0.6*signal [1] + signal[2] 
+    c_haar = rectangular_signal.haar_coef(t, general, order)
+    general_coef = [mean(general)]
+    for m in range(0, order):
+        for n in range(0, 2**m):
+              general_coef.append(c_haar[m][n])
+    general_coef = transpose(array(general_coef))
+    print(type(general_coef), general_coef.shape)
+
+    #Solve linear system
+    x = lstsq(signal_coef, general_coef, rcond=None)[0]
+    print(x)  
 
 
- 
-
-    #VMD decomposition 
-
-    # [t, Xc] = test_function.read('data/Sanse/20220301.plt', 'W_Lights')
-    # [t, Xg] = test_function.read('data/Sanse/20220301.plt', 'W_Gas_boiler')
-
-    # for j in range(0,10):
-    #     for i in range(1,len(t)-1):
-    #         Xc[i] = (Xc[i-1] + 2*Xc[i] + Xc[i+1])/4. 
-    #         Xg[i] = (Xg[i-1] + 2*Xg[i] + Xg[i+1])/4. 
-
-    # Y = Xc + Xg 
-
+    # VMD clustering 
     # VMD_modes = 2
-    # u = clustering.VMD_clustering(t, Y, VMD_modes)
-    # if len(u[0,:]) < len(t):
-    #     t1 = zeros(len(u[0,:]))
-    #     t1[:] = t[:-1] 
-    # else:
-    #     t1 = zeros(len(t))
-    #     t1[:] = t[:]   
-
-    # bs = bispectrum.bispectral_transform(t, Xc)
-    # plt.figure()
-    # bs.plot_mag()
-    # plt.title('Xc')
-    # bs = bispectrum.bispectral_transform(t, Xg)
-    # plt.figure()
-    # bs.plot_mag()
-    # plt.title('Xg')
-    # bs = bispectrum.bispectral_transform(t1, u[0,:])
-    # plt.figure()
-    # bs.plot_mag()
-    # plt.title('Mode 1')
-    # bs = bispectrum.bispectral_transform(t1, u[1,:])
-    # plt.figure()
-    # bs.plot_mag()
-    # plt.title('Mode 2')
-
-    # plt.figure()
-    # plt.title('Power [W]')
-    # plt.subplot(2,1,1)
-    # plt.plot(t,Xc,'b')
-    # plt.xlabel('t')
-    # plt.ylabel('W_computer')
-
-    # plt.subplot(2,1,2)
-    # plt.plot(t,Xg,'r')
-    # plt.xlabel('t')
-    # plt.ylabel('W_Gas_boiler')
-
-
-    # plt.figure()
-    # plt.plot(t,Y)
-    # plt.xlabel('t')
-    # plt.ylabel('W_both')
-    # plt.title('Power [W]') 
-
-    
+    # u = clustering.VMD_clustering(t, general, VMD_modes)
 
     # plt.figure()
     # plt.xlabel('t')
@@ -354,7 +340,7 @@ if __name__ == "__main__":
     # plt.title('VMD') 
     # for i in range(0, VMD_modes):
     #     plt.subplot(VMD_modes, 1, i+1)
-    #     plt.plot(t1, u[i, :])
+    #     plt.plot(t, u[i, :])
 
-    # plt.show()
+    plt.show()
 
