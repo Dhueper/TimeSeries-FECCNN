@@ -7,6 +7,7 @@ from numpy import load, argmax, sum, random, clip
 from matplotlib import pyplot as plt
 
 def CNN_model(input_shape, output_shape):
+    #Bispectrum model 
     model = Sequential()
     model.add(Conv2D(32, kernel_size=3, activation='relu', input_shape=input_shape))
     model.add(MaxPooling2D(pool_size=(3,3), padding='same'))
@@ -16,6 +17,17 @@ def CNN_model(input_shape, output_shape):
     model.add(Dropout(0.1))
     model.add(Flatten())
     model.add(Dense(output_shape, activation='softmax'))
+
+    #Haar model 
+    # model = Sequential()
+    # model.add(Conv2D(32, kernel_size=3, activation='relu', input_shape=input_shape))
+    # model.add(MaxPooling2D(pool_size=(2,2), padding='same'))
+    # model.add(Dropout(0.1))
+    # model.add(Conv2D(64, kernel_size=2, activation='relu'))
+    # model.add(MaxPooling2D(pool_size=(2,2), padding='same'))
+    # model.add(Dropout(0.1))
+    # model.add(Flatten())
+    # model.add(Dense(output_shape, activation='softmax'))
 
     model.compile(optimizer='adam', loss='categorical_crossentropy', metrics=['accuracy'])
 
@@ -40,7 +52,10 @@ def autoencoder_model(input_shape):
 
 def run_CNN():
     N = 4
-    CNN = CNN_model((21,21,1), N)
+    size = 21
+    # size = 8
+    CNN = CNN_model((size, size,1), N)
+    CNN.summary()
     # (X_train, y_train), (X_test, y_test) = mnist.load_data()
 
     # X_train = X_train.reshape(60000,28,28,1)
@@ -60,6 +75,11 @@ def run_CNN():
     y_train = load('ElectricDevices/Y_train.npy')
     y_test = load('ElectricDevices/Y_test.npy')
 
+    # X_train = load('ElectricDevices/X_train_haar.npy')
+    # X_test = load('ElectricDevices/X_test_haar.npy')
+    # y_train = load('ElectricDevices/Y_train_haar.npy')
+    # y_test = load('ElectricDevices/Y_test_haar.npy')
+
     # print(X_train.shape)
     # print(y_train.shape)
     # print(X_test.shape)
@@ -67,23 +87,24 @@ def run_CNN():
 
     CNN.fit(X_train, y_train, validation_data=(X_test, y_test), epochs=20, batch_size=32)
 
-    tags = ['W_Air_cond','W_Computers','W_Audio_TV','W_Lights','W_Kitchen','W_Washing_m','W_Dish_w','W_Gas_boiler','W_Oven_vitro'] 
-    classes = {} 
+    # tags = ['W_Air_cond','W_Computers','W_Audio_TV','W_Lights','W_Kitchen','W_Washing_m','W_Dish_w','W_Gas_boiler','W_Oven_vitro'] 
+    # classes = {} 
 
-    for tag in tags:
+    # for tag in tags:
 
-        X_eval = load('ElectricDevices/X_eval_'+tag+'.npy')
+    #     X_eval = load('ElectricDevices/X_eval_'+tag+'.npy')
 
-        prediction = CNN.predict(X_eval)
-        print()
-        print(tag)
-        print(prediction)
-        print('tag=', argmax(sum(prediction, axis=0)) + 1)
-        classes[tag] = argmax(sum(prediction, axis=0)) + 1
+    #     prediction = CNN.predict(X_eval)
+    #     print()
+    #     print(tag)
+    #     print(prediction)
+    #     print('tag=', argmax(sum(prediction, axis=0)) + 1)
+    #     classes[tag] = argmax(sum(prediction, axis=0)) + 1
+
         # print('tag=', argmax(prediction), argmax(prediction)%N + 1)
         # classes[tag] =  argmax(prediction)%N + 1
 
-    print(classes)
+    # print(classes)
 
 def preprocess(array):
     """
@@ -138,31 +159,33 @@ def display(array1, array2):
 
 if __name__ == "__main__":
     #CNN classification 
-    # run_CNN
+    run_CNN()
 
     #Autoencoder
 
-    autoencoder = autoencoder_model((21,21,1))
+    # autoencoder = autoencoder_model((21,21,1))
 
-    autoencoder.summary()
+    # autoencoder.summary()
 
-    X_train = load('ElectricDevices/X_train_AE_2.npy')
-    Y_train = load('ElectricDevices/Y_train_AE_2.npy')
-    X_test = load('ElectricDevices/X_test_AE_2.npy')
-    Y_test = load('ElectricDevices/Y_test_AE_2.npy')
+    # X_train = load('ElectricDevices/X_train_AE_2.npy')
+    # Y_train = load('ElectricDevices/Y_train_AE_2.npy')
+    # X_test = load('ElectricDevices/X_test_AE_2.npy')
+    # Y_test = load('ElectricDevices/Y_test_AE_2.npy')
 
-    display(X_train, Y_train)
+    # display(X_train, Y_train)
 
-    # autoencoder.fit(X_train, Y_train, validation_split=0.2, epochs=200, batch_size=8, shuffle=True)
-    autoencoder.fit(X_train, Y_train, validation_data=(X_test, Y_test), epochs=100, batch_size=128, shuffle=True)
+    # # autoencoder.fit(X_train, Y_train, validation_split=0.2, epochs=200, batch_size=8, shuffle=True)
+    # autoencoder.fit(X_train, Y_train, validation_data=(X_test, Y_test), epochs=100, batch_size=128, shuffle=True)
 
-    # predictions = autoencoder.predict(X_train[:,:,:,:])
+    # # predictions = autoencoder.predict(X_train[:,:,:,:])
 
-    # display(Y_train[:,:,:,:], predictions)
+    # # display(Y_train[:,:,:,:], predictions)
 
-    predictions = autoencoder.predict(X_test)
+    # predictions = autoencoder.predict(X_test)
 
-    display(Y_test, predictions)
+    # display(Y_test, predictions)
+
+
 
     # (X_train, _), (X_test, _) = mnist.load_data()
     # #preprocess 

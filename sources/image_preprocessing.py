@@ -15,6 +15,7 @@ except:
 
 import test_function
 import bispectrum
+import rectangular_signal
 import fortran_ts
 
 def process_raw_dataset():
@@ -52,6 +53,53 @@ def process_raw_dataset():
 
     # save('ElectricDevices/X_test.npy', X_test)
     # save('ElectricDevices/Y_test.npy', Y_test)
+
+def process_raw_dataset_haar():
+
+    t0 = time.time()
+
+    [X, Y] = test_function.read_dataset('ElectricDevices/ElectricDevices_TEST.txt') 
+
+    t1 = linspace(0, 1, len(X[0,:]))
+
+    X_test = [] 
+    Y_test = [] 
+
+    order = 6
+
+    for i in range(0, len(X[:,0])):
+        if Y[i] < 6 and Y[i]>1: 
+            coef = []
+            [t, X2] = rectangular_signal.reshape_2pow(t1, X[i,:])
+            coef.append(mean(X2))
+            c_haar = rectangular_signal.haar_coef(t, X2, order)
+            for m in range(0,order):
+                for n in range(0, 2**m):
+                    coef.append(c_haar[m][n])
+
+            coef = array(coef)
+            coef.reshape(int(2**(order/2)), int(2**(order/2)))
+
+            X_test.append(coef)
+            Y_test.append(Y[i]-1)
+
+    X_test = array(X_test)
+    X_test = X_test.reshape(len(X_test),int(2**(order/2)), int(2**(order/2)),1)
+
+    Y_test = array(Y_test)
+    Y_test = Y_test -1.0
+    Y_test = to_categorical(Y_test)
+
+    print(X_test.shape)
+
+    print(Y_test.shape)
+
+    tf = time.time()
+
+    print('t=', tf-t0)
+
+    save('ElectricDevices/X_test_haar.npy', X_test)
+    save('ElectricDevices/Y_test_haar.npy', Y_test)
 
 def process_raw_data():
 
@@ -194,6 +242,7 @@ def process_signal(t, X):
 
 if __name__ == "__main__":
     # process_raw_dataset()
+    process_raw_dataset_haar()
     # process_raw_data()
     # process_autoencoder_data()
-    process_autoencoder_dataset()
+    # process_autoencoder_dataset()
