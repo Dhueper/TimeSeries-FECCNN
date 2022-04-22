@@ -23,49 +23,18 @@ import fortran_ts
 #%%Bispectrum 
 def bispectrum_example():
     #Square function transformation 
-    [t, X] = test_function.square_function()
+    [t, X] = test_function.sinusoidal_function()
 
     plt.figure()
     plt.plot(t,X)
     plt.xlabel('t')
     plt.ylabel('X (t)')
-    plt.title('Square function') 
+    plt.title('Sinusoidal function') 
 
     bs = bispectrum.bispectral_transform(t, X)
 
     plt.figure()
     bs.plot_mag()
-    # plt.show()
-
-    #Triangle function transformation 
-
-    [t, Y] = test_function.triangle_function()
-
-    plt.figure()
-    plt.plot(t,Y)
-    plt.xlabel('t')
-    plt.ylabel('Y (t)')
-    plt.title('Triangle function') 
-
-    bs = bispectrum.bispectral_transform(t, Y)
-
-    plt.figure()
-    bs.plot_mag()
-    # plt.show()
-
-    #Sum of square + triangle functions
-    #  
-    plt.figure()
-    plt.plot(t,X+Y)
-    plt.xlabel('t')
-    plt.ylabel('X+Y (t)')
-    plt.title('Square + Triangle function') 
-
-    bs = bispectrum.bispectral_transform(t, X+Y)
-
-    plt.figure()
-    bs.plot_mag()
-
     plt.show()
 
 
@@ -253,7 +222,7 @@ def feature_extraction_example():
 
 if __name__ == "__main__":
     #Run examples 
-    # bispectrum_example()
+    bispectrum_example()
 
     # VMD_example()
 
@@ -263,72 +232,72 @@ if __name__ == "__main__":
 
     # feature_extraction_example()
 
-    signal = [] 
-    signal_coef = [] 
-    name_list = {'W_Computers':4, 'W_Lights':4, 'W_Gas_boiler':4} 
-    ct = 0
-    for name in name_list.keys():
-        [t0, X] = test_function.read('data/Sanse/20220301.plt', name) 
-        t0 = t0 / amax(t0)
-        Z = zeros(len(X))
-        Z[:] = X[:]  
-        #Mean value filter 
-        for _ in range(0,50):
-            Z = fortran_ts.time_series.mvf(asfortranarray(Z), 0)
+    # signal = [] 
+    # signal_coef = [] 
+    # name_list = {'W_Computers':4, 'W_Lights':4, 'W_Gas_boiler':4} 
+    # ct = 0
+    # for name in name_list.keys():
+    #     [t0, X] = test_function.read('data/Sanse/20220301.plt', name) 
+    #     t0 = t0 / amax(t0)
+    #     Z = zeros(len(X))
+    #     Z[:] = X[:]  
+    #     #Mean value filter 
+    #     for _ in range(0,50):
+    #         Z = fortran_ts.time_series.mvf(asfortranarray(Z), 0)
 
-        #Reshape to fit a power of 2. 
-        [t, Y] = rectangular_signal.reshape_2pow(t0, Z) 
+    #     #Reshape to fit a power of 2. 
+    #     [t, Y] = rectangular_signal.reshape_2pow(t0, Z) 
 
-        #Haar series expansion
-        order = name_list[name] 
-        c_haar = rectangular_signal.haar_coef(t, Y, order)
-        N = len(t)
-        c = zeros(N)
-        Y_haar = ones(N)
-        Y_haar = Y_haar * mean(Y) 
+    #     #Haar series expansion
+    #     order = name_list[name] 
+    #     c_haar = rectangular_signal.haar_coef(t, Y, order)
+    #     N = len(t)
+    #     c = zeros(N)
+    #     Y_haar = ones(N)
+    #     Y_haar = Y_haar * mean(Y) 
 
-        signal_coef.append([])
-        signal_coef[ct].append(mean(Y))
+    #     signal_coef.append([])
+    #     signal_coef[ct].append(mean(Y))
 
-        for m in range(0, order):
-            for n in range(0, 2**m):
-                for i in range(0, N):
-                    c[i] = rectangular_signal.phi(t[i], m, n) * c_haar[m][n]  
-                signal_coef[ct].append(c_haar[m][n]) 
-                Y_haar  = Y_haar + c 
+    #     for m in range(0, order):
+    #         for n in range(0, 2**m):
+    #             for i in range(0, N):
+    #                 c[i] = rectangular_signal.phi(t[i], m, n) * c_haar[m][n]  
+    #             signal_coef[ct].append(c_haar[m][n]) 
+    #             Y_haar  = Y_haar + c 
 
-        N_coef = sum(array([2**i for i in range(0,order)])) + 1
-        print('Reshaped signal:', len(Y), 'points')
-        print('Haar signal:', N_coef, 'coefficients')
-        noise = random.normal(0, 0.1*amax(Y_haar), len(Y_haar))
-        Y_haar = Y_haar + noise
-        signal.append(Y_haar)
-        ct += 1
+    #     N_coef = sum(array([2**i for i in range(0,order)])) + 1
+    #     print('Reshaped signal:', len(Y), 'points')
+    #     print('Haar signal:', N_coef, 'coefficients')
+    #     noise = random.normal(0, 0.1*amax(Y_haar), len(Y_haar))
+    #     Y_haar = Y_haar + noise
+    #     signal.append(Y_haar)
+    #     ct += 1
 
-        plt.figure()
-        plt.plot(t0, X, 'g')
-        plt.plot(t, Y, 'c')
-        plt.plot(t, Y_haar, 'b')
-        plt.xlabel('t [h]')
-        plt.ylabel('P [W]')
-        plt.title('Power consumption' + name)
-        # plt.show()
+    #     plt.figure()
+    #     plt.plot(t0, X, 'g')
+    #     plt.plot(t, Y, 'c')
+    #     plt.plot(t, Y_haar, 'b')
+    #     plt.xlabel('t [h]')
+    #     plt.ylabel('P [W]')
+    #     plt.title('Power consumption' + name)
+    #     # plt.show()
 
-    signal_coef = transpose(array(signal_coef))
-    print(type(signal_coef), signal_coef.shape)
+    # signal_coef = transpose(array(signal_coef))
+    # print(type(signal_coef), signal_coef.shape)
 
-    general = 0.4*signal[0] + 0.6*signal [1] + signal[2] 
-    c_haar = rectangular_signal.haar_coef(t, general, order)
-    general_coef = [mean(general)]
-    for m in range(0, order):
-        for n in range(0, 2**m):
-              general_coef.append(c_haar[m][n])
-    general_coef = transpose(array(general_coef))
-    print(type(general_coef), general_coef.shape)
+    # general = 0.4*signal[0] + 0.6*signal [1] + signal[2] 
+    # c_haar = rectangular_signal.haar_coef(t, general, order)
+    # general_coef = [mean(general)]
+    # for m in range(0, order):
+    #     for n in range(0, 2**m):
+    #           general_coef.append(c_haar[m][n])
+    # general_coef = transpose(array(general_coef))
+    # print(type(general_coef), general_coef.shape)
 
-    #Solve linear system
-    x = lstsq(signal_coef, general_coef, rcond=None)[0]
-    print(x)  
+    # #Solve linear system
+    # x = lstsq(signal_coef, general_coef, rcond=None)[0]
+    # print(x)  
 
     #Haar transform
  
@@ -346,5 +315,5 @@ if __name__ == "__main__":
     #     plt.subplot(VMD_modes, 1, i+1)
     #     plt.plot(t, u[i, :])
 
-    plt.show()
+    # plt.show()
 
