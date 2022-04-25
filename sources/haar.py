@@ -1171,7 +1171,8 @@ if ( __name__ == '__main__' ):
     name = 'W_Lights'
     # name = 'W_Computers'
     # name = 'W_Gas_boiler'
-    [t0, X] = test_function.read('data/Sanse/20220301.plt', name) 
+    # [t0, X] = test_function.read('data/Sanse/20220301.plt', name) 
+    [t0, X] = test_function.sinusoidal_function()  
     t0 = t0 / amax(t0)
     Z = zeros(len(X))
     Z[:] = X[:]  
@@ -1194,9 +1195,9 @@ if ( __name__ == '__main__' ):
 
     plt.figure()
     plt.plot(t, Y_h)
-    plt.xlabel('k')
-    plt.ylabel('Amplitude')
-    plt.title('Haar Transform')
+    plt.xlabel('')
+    plt.ylabel('$\it{A}$', rotation=0)
+    # plt.title('Haar Transform')
 
     #Filter
     Y_h[int(0.05*len(Y_h)):-1] = 0.0
