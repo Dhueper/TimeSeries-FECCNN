@@ -1171,8 +1171,8 @@ if ( __name__ == '__main__' ):
     name = 'W_Lights'
     # name = 'W_Computers'
     # name = 'W_Gas_boiler'
-    # [t0, X] = test_function.read('data/Sanse/20220301.plt', name) 
-    [t0, X] = test_function.sinusoidal_function()  
+    [t0, X] = test_function.read('data/Sanse/20220301.plt', name) 
+    # [t0, X] = test_function.sinusoidal_function()  
     t0 = t0 / amax(t0)
     Z = zeros(len(X))
     Z[:] = X[:]  
@@ -1200,16 +1200,17 @@ if ( __name__ == '__main__' ):
     # plt.title('Haar Transform')
 
     #Filter
-    Y_h[int(0.05*len(Y_h)):-1] = 0.0
+    comp_ratio = 1./16
+    Y_h[int(comp_ratio*len(Y_h)):-1] = 0.0
     Y_inv =   haar_1d_inverse (len(Y_h), Y_h)
 
-    for _ in range(0,10):
-        Y_inv = fortran_ts.time_series.mvf(asfortranarray(Y_inv), 0)
+    # for _ in range(0,10):
+    #     Y_inv = fortran_ts.time_series.mvf(asfortranarray(Y_inv), 0)
 
     plt.figure()
     plt.plot(t, Y_inv)
-    plt.xlabel('t')
-    plt.ylabel('Power [W]')
-    plt.title('Filtered Power consumption')
+    plt.xlabel('$\it{t}$ [s]')
+    plt.ylabel('$\it{X(t)}$', rotation=0)
+    plt.title('Power consumption ' + str(int(1./comp_ratio)) + ':1 compression')
     plt.show()
 

@@ -189,6 +189,13 @@ def feature_extraction_example():
 
     Features = feature_extraction.Features(t, X)
 
+    Mean = Features.Mean()
+    print("Mean: M=", Mean)
+
+    Max, Min = Features.Max_Min()
+    print("Maximum: Max=", Max)
+    print("Minimum: Min=", Min)
+
     SPW = Features.SPow()
     print("Spectral Power: SPW=", SPW)
 
@@ -202,9 +209,10 @@ def feature_extraction_example():
     SC = Features.SCen()
     print("Spectral Centroid: SC=", SC)
 
-    AM, FM = Features.BW()
+    AM, FM, E = Features.BW()
     print("AM bandwidth: AM=", AM)
     print("FM bandwidth: FM=", FM)
+    print("Energy: E=", E)
 
     V, HM, HC = Features.Hjorth()
     print("Variance: Var=", V)
@@ -222,7 +230,7 @@ def feature_extraction_example():
 
 if __name__ == "__main__":
     #Run examples 
-    bispectrum_example()
+    # bispectrum_example()
 
     # VMD_example()
 
@@ -230,7 +238,7 @@ if __name__ == "__main__":
 
     # EMD_example()
 
-    # feature_extraction_example()
+    feature_extraction_example()
 
     # signal = [] 
     # signal_coef = [] 

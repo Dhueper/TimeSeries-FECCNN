@@ -1,5 +1,5 @@
 """ Feature extraction module"""
-from numpy import sum, log2, argmax, trapz, gradient, sqrt, var
+from numpy import sum, log2, argmax, trapz, gradient, sqrt, var, mean, max, min
 from scipy.signal import welch 
 from scipy.stats import skew, kurtosis
 
@@ -20,6 +20,36 @@ class Features():
         self.Xp = gradient(self.X, self.t[1]-self.t[0])
 
         self.fdict = {} 
+
+    def Mean(self):
+        """Computes the Mean of the signal.
+
+        Intent(in): self (object), class Features.
+
+        Returns: M (float), Mean of the timeseries.
+        """
+
+        M = mean(self.X)
+        self.fdict['M'] = M
+
+        return M
+
+    def Max_Min(self):
+        """Computes the max and min of the signal.
+
+        Intent(in): self (object), class Features.
+
+        Returns: Max (float), Max of the timeseries;
+                 Min (float), Min of the timeseries;
+        """
+
+        Max = max(self.X)
+        Min = min(self.X)
+
+        self.fdict['Max'] = Max
+        self.fdict['Min'] = Min
+
+        return Max, Min
 
     def SPow(self):
         """Computes the Spectral Power of the signal.
@@ -86,7 +116,8 @@ class Features():
                 FM (float), FM bandwidth of the timeseries.
         """
 
-        E = trapz(self.Pxx, x=self.f)
+        # E = trapz(self.Pxx, x=self.f)
+        E = trapz(self.X**2., x=self.t)
 
         AM = sqrt(trapz(self.Xp**2., x=self.t) / E)
 
@@ -96,8 +127,9 @@ class Features():
 
         self.fdict['AM'] = AM
         self.fdict['FM'] = FM 
+        self.fdict['E'] = E
 
-        return AM, FM
+        return AM, FM, E
 
     def Hjorth(self):
         """Computes the variance, Hjorth mobility and Hjorth complexity of the signal.
