@@ -2,7 +2,7 @@ import os
 import sys
 
 from matplotlib import pyplot as plt
-from numpy import zeros, mean, asfortranarray, linspace, amax, ones, sum, array, transpose
+from numpy import zeros, mean, asfortranarray, linspace, amax, ones, sum, array, transpose, sqrt, var, abs
 from numpy.linalg import lstsq
 from numpy import random
 from scipy.interpolate import interp1d
@@ -228,15 +228,23 @@ def feature_extraction_example():
     # print(Features.fdict)
 
 def power_estimation():
-    name_list = {'W_Computers':4, 'W_Kitchen':4} 
+    name_list = {'W_Air_cond':4, 'W_Kitchen':4} 
+    signal_coef = [] 
+    signal_general = [] 
+    signal_ratio = [] 
+    mean_ratio = []
+    var_ratio = []
+    rmse_ratio = []
+    order = 4
+    ct = 0
     for name in name_list.keys():
         plt.figure()
         plt.title(name)
         plt.xlabel('t [h]')
         plt.ylabel('P [W]')
 
-        for i in range(1,9,7):
-            [t0, X] = test_function.read('data/Sanse/2022030'+str(i)+'.plt', name) 
+        for i in range(0,2):
+            [t0, X] = test_function.read('data/Sanse/2022030'+str(1 + 7*i)+'.plt', name) 
 
             t0 = t0 / amax(t0)
             Z = zeros(len(X))
@@ -246,17 +254,65 @@ def power_estimation():
                 Z = fortran_ts.time_series.mvf(asfortranarray(Z), 0)
 
             #Reshape to fit a power of 2. 
-            [t, Y] = rectangular_signal.reshape_2pow(t0, Z) 
+            [t, Y] = rectangular_signal.reshape_2pow(t0, Z)
 
-            #Haar series expansion
-            order = 4
-            c_haar = rectangular_signal.haar_coef(t, Y, order)
+            if i == 0: # Reference signal of class 'name'  
 
-            
-            plt.plot(t0, Z)
+                #Haar series expansion
+                c_haar = rectangular_signal.haar_coef(t, Y, order)
+
+                signal_coef.append([])
+                signal_coef[ct].append(mean(Y)) 
+
+                signal_ratio.append(Y)
+                mean_ratio.append(mean(Y))
+                var_ratio.append(var(Y))
+                rmse_ratio.append(Y)
+
+                for m in range(0, order):
+                    for n in range(0, 2**m):
+                        # for i in range(0, N):
+                        #     c[i] = rectangular_signal.phi(t[i], m, n) * c_haar[m][n]  
+                        signal_coef[ct].append(c_haar[m][n]) 
+
+
+            else:
+                signal_general.append(Y)
+                signal_ratio[ct] = 1. / ( sum(signal_ratio[ct] / Y) / len(Y) )
+                mean_ratio[ct] = 1. / ( mean_ratio[ct] / mean(Y) )
+                var_ratio[ct] = 1. / ( var_ratio[ct] / var(Y) )
+                rmse_ratio[ct] =   sqrt(sum((signal_ratio[ct] - Y)**2.) / len(Y)) 
+
+            plt.plot(t, Y)
+        ct += 1
         plt.legend(['01/03', '08/03'])
             
     plt.show()
+
+    #Reference signals matrix 
+    signal_coef = transpose(array(signal_coef))
+    print(type(signal_coef), signal_coef.shape)
+
+    #General power signal 
+    general = array(signal_general[0][:])
+    for i in range(1, len(signal_general)):
+        general = general + array(signal_general[i][:])
+
+    c_haar = rectangular_signal.haar_coef(t, general, order)
+    general_coef = [mean(general)]
+    for m in range(0, order):
+        for n in range(0, 2**m):
+              general_coef.append(c_haar[m][n])
+    general_coef = transpose(array(general_coef))
+    print(type(general_coef), general_coef.shape)
+
+    #Solve linear system
+    x = lstsq(signal_coef, general_coef, rcond=None)[0]
+    print('System solution:', x) 
+    print('Signal ratio:', signal_ratio)
+    print('Mean ratio:', mean_ratio)
+    print('sigma ratio:', sqrt(var_ratio))
+    # print('RMSE ratio:', rmse_ratio)
 
 if __name__ == "__main__":
     #Run examples 
@@ -271,6 +327,8 @@ if __name__ == "__main__":
     # feature_extraction_example()
 
     power_estimation()
+
+
 
     # signal = [] 
     # signal_coef = [] 
