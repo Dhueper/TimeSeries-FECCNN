@@ -227,6 +227,36 @@ def feature_extraction_example():
 
     # print(Features.fdict)
 
+def power_estimation():
+    name_list = {'W_Computers':4, 'W_Kitchen':4} 
+    for name in name_list.keys():
+        plt.figure()
+        plt.title(name)
+        plt.xlabel('t [h]')
+        plt.ylabel('P [W]')
+
+        for i in range(1,9,7):
+            [t0, X] = test_function.read('data/Sanse/2022030'+str(i)+'.plt', name) 
+
+            t0 = t0 / amax(t0)
+            Z = zeros(len(X))
+            Z[:] = X[:]  
+            #Mean value filter 
+            for _ in range(0,50):
+                Z = fortran_ts.time_series.mvf(asfortranarray(Z), 0)
+
+            #Reshape to fit a power of 2. 
+            [t, Y] = rectangular_signal.reshape_2pow(t0, Z) 
+
+            #Haar series expansion
+            order = 4
+            c_haar = rectangular_signal.haar_coef(t, Y, order)
+
+            
+            plt.plot(t0, Z)
+        plt.legend(['01/03', '08/03'])
+            
+    plt.show()
 
 if __name__ == "__main__":
     #Run examples 
@@ -238,7 +268,9 @@ if __name__ == "__main__":
 
     # EMD_example()
 
-    feature_extraction_example()
+    # feature_extraction_example()
+
+    power_estimation()
 
     # signal = [] 
     # signal_coef = [] 
@@ -289,12 +321,12 @@ if __name__ == "__main__":
     #     plt.xlabel('t [h]')
     #     plt.ylabel('P [W]')
     #     plt.title('Power consumption' + name)
-    #     # plt.show()
+    #     plt.show()
 
     # signal_coef = transpose(array(signal_coef))
     # print(type(signal_coef), signal_coef.shape)
 
-    # general = 0.4*signal[0] + 0.6*signal [1] + signal[2] 
+    # general = 0.4*signal[0] + 0.6*signal[1] + signal[2] 
     # c_haar = rectangular_signal.haar_coef(t, general, order)
     # general_coef = [mean(general)]
     # for m in range(0, order):
