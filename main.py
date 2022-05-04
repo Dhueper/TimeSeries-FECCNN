@@ -1,5 +1,6 @@
 import os
 import sys
+import random
 
 from matplotlib import pyplot as plt
 from numpy import zeros, mean, asfortranarray, linspace, amax, ones, sum, array, transpose, sqrt, var, abs
@@ -227,8 +228,8 @@ def feature_extraction_example():
 
     # print(Features.fdict)
 
-def power_estimation():
-    name_list = {'W_Air_cond':4, 'W_Kitchen':4} 
+def power_estimation(r):
+    name_list = {'W_Air_cond':4, 'W_Kitchen':4, 'W_Computers':4} 
     signal_coef = [] 
     signal_general = [] 
     signal_ratio = [] 
@@ -244,7 +245,19 @@ def power_estimation():
         plt.ylabel('P [W]')
 
         for i in range(0,2):
-            [t0, X] = test_function.read('data/Sanse/2022030'+str(1 + 7*i)+'.plt', name) 
+            [t0, X] = test_function.read('data/Sanse/2022030'+str(1 + 0*i)+'.plt', name) 
+            if i == 1:
+                r = random.randint(0, int(30*len(X)/(24*60))) #Shift phase up to 15 min
+                p = 1 + (random.randint(0, 10) - 5)/10.
+                # r = 0
+                # p = 1
+
+                X1 = zeros(len(X))
+                X1[:] = X[:]
+                X[r:len(X)] = X1[0:len(X)-r]   
+                X[0:r] = X1[len(X)-r:len(X)]   
+                X = p * X
+                 
 
             t0 = t0 / amax(t0)
             Z = zeros(len(X))
@@ -309,10 +322,11 @@ def power_estimation():
     #Solve linear system
     x = lstsq(signal_coef, general_coef, rcond=None)[0]
     print('System solution:', x) 
-    print('Signal ratio:', signal_ratio)
     print('Mean ratio:', mean_ratio)
+    print('Signal ratio:', signal_ratio)
     print('sigma ratio:', sqrt(var_ratio))
     # print('RMSE ratio:', rmse_ratio)
+    return abs(x - array(mean_ratio)), abs(x - array(signal_ratio))
 
 if __name__ == "__main__":
     #Run examples 
@@ -326,7 +340,31 @@ if __name__ == "__main__":
 
     # feature_extraction_example()
 
-    power_estimation()
+    power_estimation(0)
+    #Phase shift test 
+    # x = [] 
+    # y = [] 
+    # phase_s = array([i for i in range(0, 200)])
+    # for r in phase_s:
+    #     print()
+    #     print('r=', r)
+    #     m_ratio, s_ratio = power_estimation(r)
+    #     x.append(m_ratio)
+    #     y.append(s_ratio)
+    #     plt.close('all')
+    # x = array(x)
+    # y = array(y)
+    # plt.figure()
+    # plt.plot(phase_s, x)
+    # plt.title('Mean ratio')
+    # plt.xlabel('phase shift')
+
+    # plt.figure()
+    # plt.plot(phase_s, y)
+    # plt.title('Signal ratio')
+    # plt.xlabel('phase shift')
+    # plt.show()
+
 
 
 
