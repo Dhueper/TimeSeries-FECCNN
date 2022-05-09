@@ -2,7 +2,7 @@
 import sys
 import os
 
-from numpy import pi, arccos, arcsin, sin, cos, sqrt, linspace, zeros, array, float32, asfortranarray
+from numpy import pi, arccos, arcsin, sin, cos, sqrt, linspace, zeros, array, float32, asfortranarray, concatenate
 from matplotlib import pyplot as plt 
 from scipy.interpolate import interp1d
 
@@ -71,6 +71,14 @@ def sinusoidal_function():
 
     return [t,y] 
 
+def sinusoidal_function_f_mod():
+    t = linspace(0,1,1000)
+    y = zeros(len(t))
+
+    y = sin(2*pi*10*(t+1) * t) + sin(2*pi*50*(t+1) * t)
+
+    return [t,y] 
+
 def read(filename, name='W_General'): 
   file = open(filename,'r')
   N = len(file.readlines())
@@ -108,13 +116,13 @@ def read_dataset(filename):
 
 if __name__ == "__main__":
 
-    [t, X] = square_function3() 
-    [t, Y] = square_function2() 
-    Z = X + Y
+    # [t, X] = square_function3() 
+    # [t, Y] = square_function2() 
+    # Z = X + Y
 
-    plt.figure()
-    plt.plot(t, Z)
-    plt.show() 
+    # plt.figure()
+    # plt.plot(t, Z)
+    # plt.show() 
 
     # name = 'W_Lights'
     # [t, X] = read('data/Sanse/20220301.plt', name)
@@ -144,5 +152,32 @@ if __name__ == "__main__":
     # plt.plot(X[0,:])
     # plt.show()
     # print(len(X[0,:] ))
+
+    name = 'W_Air_cond' 
+    for i in range(0, 7):
+        [t0, X] = read('data/Sanse/2022030'+str(1 + i)+'.plt', name)
+        if i == 0:
+            Y = zeros(len(X))
+            Y[:] = X[:]
+            t = zeros(len(t0))
+            t[:] = t0[:]
+        else:
+            Y = concatenate((Y, X), axis=None) 
+            t = concatenate((t, t0 + t[-1]), axis=None) 
+
+    #Noise Mean Value Filter
+    for _ in range(0,100):
+        Y = fortran_ts.time_series.mvf(asfortranarray(Y), 1)
+        Y[0] = 2*Y[1] - Y[2] 
+        Y[len(Y)-1] = 2*Y[len(Y)-2] - Y[len(Y)-3] 
+
+    plt.figure()
+    plt.plot(t, Y)
+    plt.xlabel('$\it{t}$ [h]', fontsize=18)
+    plt.ylabel('$\it{P}$ [W]', fontsize=18, rotation=0)
+    plt.xticks(fontsize = 18)
+    plt.yticks(fontsize = 18)
+    plt.show()
+
 
 

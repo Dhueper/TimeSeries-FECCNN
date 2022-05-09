@@ -3,10 +3,11 @@ import sys
 import random
 
 from matplotlib import pyplot as plt
-from numpy import zeros, mean, asfortranarray, linspace, amax, ones, sum, array, transpose, sqrt, var, abs
+from numpy import zeros, mean, asfortranarray, linspace, amax, amin, ones, sum, array, transpose, sqrt, var, abs
 from numpy.linalg import lstsq
 from numpy import random
 from scipy.interpolate import interp1d
+from scipy.signal import spectrogram
 
 try:
     sys.path.insert(1, '/'.join(os.path.dirname(os.path.abspath(__file__)).split('/'))+'/sources')
@@ -24,7 +25,7 @@ import fortran_ts
 #%%Bispectrum 
 def bispectrum_example():
     #Square function transformation 
-    [t, X] = test_function.sinusoidal_function()
+    [t, X] = test_function.sinusoidal_function_f_mod()
 
     plt.figure()
     plt.plot(t,X)
@@ -245,12 +246,30 @@ def power_estimation(r):
         plt.ylabel('P [W]')
 
         for i in range(0,2):
-            [t0, X] = test_function.read('data/Sanse/2022030'+str(1 + 0*i)+'.plt', name) 
-            if i == 1:
-                r = random.randint(0, int(30*len(X)/(24*60))) #Shift phase up to 15 min
-                p = 1 + (random.randint(0, 10) - 5)/10.
-                # r = 0
-                # p = 1
+            [t0, X] = test_function.read('data/Sanse/2022030'+str(1 + 7*i)+'.plt', name) 
+            if i == 0:
+                env = zeros((7, len(X)))
+                env[0,:]  = array(X)[:] 
+                X2 = zeros(len(X))
+                for j in range(1, 7):
+                    [t1, X1] = test_function.read('data/Sanse/2022030'+str(1 + 7*i + j)+'.plt', name)
+                    X2[0:min(len(X1), len(X2))]  = array(X1)[0:min(len(X1), len(X2))] 
+                    env[j,:] = X2[:]  
+                max_env = amax(env, axis=0)
+                min_env = amin(env, axis=0)
+                mean_env = mean(env, axis=0)
+
+                X[:] = mean_env[:]  
+
+                # plt.plot(t0, max_env)
+                # plt.plot(t0, min_env)
+                # plt.plot(t0, mean_env)
+
+            elif i == 1:
+                # r = random.randint(0, int(30*len(X)/(24*60))) #Shift phase up to 30 min
+                # p = 1 + (random.randint(0, 10) - 5)/10.
+                r = 0
+                p = 1
 
                 X1 = zeros(len(X))
                 X1[:] = X[:]
@@ -294,14 +313,15 @@ def power_estimation(r):
                 signal_ratio[ct] = 1. / ( sum(signal_ratio[ct] / Y) / len(Y) )
                 mean_ratio[ct] = 1. / ( mean_ratio[ct] / mean(Y) )
                 var_ratio[ct] = 1. / ( var_ratio[ct] / var(Y) )
-                rmse_ratio[ct] =   sqrt(sum((signal_ratio[ct] - Y)**2.) / len(Y)) 
+                # rmse_ratio[ct] =   sqrt(sum((signal_ratio[ct] - Y)**2.) / len(Y)) 
+                rmse_ratio[ct] = sqrt(sum(Y**2.) / len(Y)) / sqrt(sum(rmse_ratio[ct]**2.) / len(Y)) 
 
             plt.plot(t, Y)
-        ct += 1
-        plt.legend(['01/03', '08/03'])
             
-    plt.show()
-
+        ct += 1
+        plt.legend(['max_env', 'min_env', 'mean_env', 'signal'])
+        plt.show()
+                
     #Reference signals matrix 
     signal_coef = transpose(array(signal_coef))
     print(type(signal_coef), signal_coef.shape)
@@ -325,12 +345,25 @@ def power_estimation(r):
     print('Mean ratio:', mean_ratio)
     print('Signal ratio:', signal_ratio)
     print('sigma ratio:', sqrt(var_ratio))
-    # print('RMSE ratio:', rmse_ratio)
+    print('RMSE ratio:', rmse_ratio)
     return abs(x - array(mean_ratio)), abs(x - array(signal_ratio))
+
+def spectrogram_example():
+    [t, X] = test_function.sinusoidal_function_f_mod()
+    fs = 1./(t[1] - t[0])
+    f, t, Sxx = spectrogram(X, fs, nperseg=128)
+    f_max = len(f)//3
+    plt.pcolormesh(t, f[0:f_max], Sxx[0:f_max,:], shading='gouraud')
+    plt.ylabel('$\it{f}$ [Hz]', fontsize=18, rotation=0)
+    plt.xlabel('$\it{t}$ [s]', fontsize=18)
+    plt.xticks(fontsize=18)
+    plt.yticks(fontsize=18)
+    plt.colorbar()
+    plt.show()
 
 if __name__ == "__main__":
     #Run examples 
-    # bispectrum_example()
+    bispectrum_example()
 
     # VMD_example()
 
@@ -340,7 +373,10 @@ if __name__ == "__main__":
 
     # feature_extraction_example()
 
-    power_estimation(0)
+    # spectrogram_example()
+
+    # power_estimation(0)
+    
     #Phase shift test 
     # x = [] 
     # y = [] 
