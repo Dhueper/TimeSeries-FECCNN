@@ -398,6 +398,9 @@ def Haar_compression():
 def Haar_compression_error():
     s_rate = array([2**i for i in range(10, 19)])
     rmse = [] 
+    error = [] 
+    max_comp = 4 #Maximum compression ratio will be 2**max_comp 
+    plt.figure()
     for r in s_rate:
         [t0, X] = test_function.sinusoidal_function_rate(r)  
         t0 = t0 / amax(t0)
@@ -408,19 +411,26 @@ def Haar_compression_error():
         Y_h = haar.haar_1d ( len(Y), Y )
 
         #Filter
-        comp_ratio = 1./8
-        Y_h[int(comp_ratio*len(Y_h)):-1] = 0.0
-        Y_inv =   haar.haar_1d_inverse (len(Y_h), Y_h)
+        rmse = [] 
+        for j in range(1, max_comp+1):
+            comp_ratio = 1./2**j
+            Y_h[int(comp_ratio*len(Y_h)):-1] = 0.0
+            Y_inv =   haar.haar_1d_inverse (len(Y_h), Y_h)
 
-        rmse.append(sqrt(sum((Y-Y_inv)**2.)/len(Y)))
+            rmse.append(sqrt(sum((Y-Y_inv)**2.)/len(Y)))
+        error.append(rmse)
 
-    plt.figure()
-    plt.semilogy(s_rate, rmse)
+    error = array(error).T
+    legend = [] 
+    for j in range(0,max_comp):
+        plt.semilogy(s_rate, error[j,:])
+        legend.append(str(int(2**(j+1))) + ':1')
     plt.xlabel('$\it{sampling \,  rate}$ [Hz]', fontsize=18)
     plt.ylabel('$\it{RMSE}$', rotation=0, fontsize=18)
     plt.xticks(fontsize=18)
     plt.yticks(fontsize=18)
-    plt.title('Compression error for a ' + str(int(1./comp_ratio)) + ':1 compression')
+    plt.title('Compression error for different compression ratios')
+    plt.legend(legend, fontsize=18)
     plt.show()
 
 if __name__ == "__main__":
@@ -433,7 +443,7 @@ if __name__ == "__main__":
 
     # EMD_example()
 
-    # feature_extraction_example()
+    feature_extraction_example()
 
     # spectrogram_example()
 
@@ -441,7 +451,7 @@ if __name__ == "__main__":
 
     # Haar_compression()
 
-    Haar_compression_error()
+    # Haar_compression_error()
     
     #Phase shift test 
     # x = [] 

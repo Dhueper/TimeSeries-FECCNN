@@ -3,6 +3,7 @@ import sys
 import os
 
 from numpy import pi, arccos, arcsin, sin, cos, sqrt, linspace, zeros, array, float32, asfortranarray, concatenate
+from numpy.random import normal
 from matplotlib import pyplot as plt 
 from scipy.interpolate import interp1d
 
@@ -122,7 +123,56 @@ def read_dataset(filename):
     file.close()
     return [X, Y] 
 
+def spectral_entropy():
+    t = linspace(0,1,1000)
+    y = zeros(len(t))
+
+    y = normal(0, 0.1, len(y)) + sin(2*pi*10 * t)
+    x = normal(0, 1, len(y)) 
+
+    plt.figure()
+    plt.subplot(2,1,1)
+    plt.plot(t, x, 'r')
+    plt.ylabel('$\it{N (t)}$', rotation=0, fontsize=18)
+    plt.legend(['SEnt=0.98'], fontsize=18, loc='upper right')
+    plt.xticks(fontsize=18)
+    plt.yticks(fontsize=18)
+    plt.subplot(2,1,2)
+    plt.plot(t, y, 'b')
+    plt.xlabel('$\it{t}$ [s]', fontsize=18)
+    plt.ylabel('$\it{X (t)}$', rotation=0, fontsize=18)
+    plt.legend(['SEnt=0.22'], fontsize=18, loc='upper right')
+    plt.xticks(fontsize=18)
+    plt.yticks(fontsize=18)
+    plt.show()
+
+    return [t,x] 
+
+def bandwidth_am():
+    t = linspace(0,1,1000)
+    y = 4*sin(2*pi*10 * t) + 2*sin(2*pi*30 * t) + 1*sin(2*pi*60 * t)
+    x = 4*sin(2*pi*10 * t) + 2*sin(2*pi*40 * t) + 1*sin(2*pi*80 * t)
+
+    plt.figure()
+    plt.subplot(2,1,1)
+    plt.plot(t, x, 'r')
+    plt.ylabel('$\it{X_1 (t)}$', rotation=0, fontsize=18)
+    plt.legend(['B_AM=160 Hz, B_FM=495 Hz'], fontsize=18, loc='upper right')
+    plt.xticks(fontsize=18)
+    plt.yticks(fontsize=18)
+    plt.subplot(2,1,2)
+    plt.plot(t, y, 'b')
+    plt.xlabel('$\it{t}$ [s]', fontsize=18)
+    plt.ylabel('$\it{X_2 (t)}$', rotation=0, fontsize=18)
+    plt.legend(['B_AM=127 Hz, B_FM=354 Hz'], fontsize=18, loc='upper right')
+    plt.xticks(fontsize=18)
+    plt.yticks(fontsize=18)
+    plt.show()
+
+    return [t,y]
+
 if __name__ == "__main__":
+    bandwidth_am()
 
     # [t, X] = square_function3() 
     # [t, Y] = square_function2() 
@@ -161,31 +211,33 @@ if __name__ == "__main__":
     # plt.show()
     # print(len(X[0,:] ))
 
-    name = 'W_Air_cond' 
-    for i in range(0, 7):
-        [t0, X] = read('data/Sanse/2022030'+str(1 + i)+'.plt', name)
-        if i == 0:
-            Y = zeros(len(X))
-            Y[:] = X[:]
-            t = zeros(len(t0))
-            t[:] = t0[:]
-        else:
-            Y = concatenate((Y, X), axis=None) 
-            t = concatenate((t, t0 + t[-1]), axis=None) 
 
-    #Noise Mean Value Filter
-    for _ in range(0,100):
-        Y = fortran_ts.time_series.mvf(asfortranarray(Y), 1)
-        Y[0] = 2*Y[1] - Y[2] 
-        Y[len(Y)-1] = 2*Y[len(Y)-2] - Y[len(Y)-3] 
 
-    plt.figure()
-    plt.plot(t, Y)
-    plt.xlabel('$\it{t}$ [h]', fontsize=18)
-    plt.ylabel('$\it{P}$ [W]', fontsize=18, rotation=0)
-    plt.xticks(fontsize = 18)
-    plt.yticks(fontsize = 18)
-    plt.show()
+    # name = 'W_Air_cond' 
+    # for i in range(0, 7):
+    #     [t0, X] = read('data/Sanse/2022030'+str(1 + i)+'.plt', name)
+    #     if i == 0:
+    #         Y = zeros(len(X))
+    #         Y[:] = X[:]
+    #         t = zeros(len(t0))
+    #         t[:] = t0[:]
+    #     else:
+    #         Y = concatenate((Y, X), axis=None) 
+    #         t = concatenate((t, t0 + t[-1]), axis=None) 
+
+    # #Noise Mean Value Filter
+    # for _ in range(0,100):
+    #     Y = fortran_ts.time_series.mvf(asfortranarray(Y), 1)
+    #     Y[0] = 2*Y[1] - Y[2] 
+    #     Y[len(Y)-1] = 2*Y[len(Y)-2] - Y[len(Y)-3] 
+
+    # plt.figure()
+    # plt.plot(t, Y)
+    # plt.xlabel('$\it{t}$ [h]', fontsize=18)
+    # plt.ylabel('$\it{P}$ [W]', fontsize=18, rotation=0)
+    # plt.xticks(fontsize = 18)
+    # plt.yticks(fontsize = 18)
+    # plt.show()
 
 
 

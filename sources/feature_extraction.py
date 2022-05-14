@@ -72,7 +72,9 @@ class Features():
         Returns: SE (float), Spectral Entropy of the timeseries.
         """
 
-        SE = - sum(self.Pxx * log2(self.Pxx + 1e-8)) / log2(self.N)
+        # SE = - sum(self.Pxx * log2(self.Pxx + 1e-8)) / log2(self.N)
+        P = self.Pxx / sum(self.Pxx) + 1e-8
+        SE = - sum(P * log2(P)) / log2(self.N)
         self.fdict['SE'] = SE
 
         return SE
