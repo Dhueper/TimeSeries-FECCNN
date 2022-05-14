@@ -24,7 +24,6 @@ import fortran_ts
 
 #%%Bispectrum 
 def bispectrum_example():
-    #Square function transformation 
     [t, X] = test_function.sinusoidal_function_f_mod()
 
     plt.figure()
@@ -229,8 +228,8 @@ def feature_extraction_example():
 
     # print(Features.fdict)
 
-def power_estimation(r):
-    name_list = {'W_Air_cond':4, 'W_Kitchen':4, 'W_Computers':4} 
+def power_estimation():
+    name_list = {'W_Air_cond':4, 'W_Gas_boiler':4} 
     signal_coef = [] 
     signal_general = [] 
     signal_ratio = [] 
@@ -239,6 +238,7 @@ def power_estimation(r):
     rmse_ratio = []
     order = 4
     ct = 0
+    use_env = False
     for name in name_list.keys():
         plt.figure()
         plt.title(name)
@@ -248,18 +248,19 @@ def power_estimation(r):
         for i in range(0,2):
             [t0, X] = test_function.read('data/Sanse/2022030'+str(1 + 7*i)+'.plt', name) 
             if i == 0:
-                env = zeros((7, len(X)))
-                env[0,:]  = array(X)[:] 
-                X2 = zeros(len(X))
-                for j in range(1, 7):
-                    [t1, X1] = test_function.read('data/Sanse/2022030'+str(1 + 7*i + j)+'.plt', name)
-                    X2[0:min(len(X1), len(X2))]  = array(X1)[0:min(len(X1), len(X2))] 
-                    env[j,:] = X2[:]  
-                max_env = amax(env, axis=0)
-                min_env = amin(env, axis=0)
-                mean_env = mean(env, axis=0)
-
-                X[:] = mean_env[:]  
+                ## Use envelope as pattern
+                if use_env:
+                    env = zeros((7, len(X)))
+                    env[0,:]  = array(X)[:] 
+                    X2 = zeros(len(X))
+                    for j in range(1, 7):
+                        [t1, X1] = test_function.read('data/Sanse/2022030'+str(1 + 7*i + j)+'.plt', name)
+                        X2[0:min(len(X1), len(X2))]  = array(X1)[0:min(len(X1), len(X2))] 
+                        env[j,:] = X2[:]  
+                    max_env = amax(env, axis=0)
+                    min_env = amin(env, axis=0)
+                    mean_env = mean(env, axis=0)
+                    X[:] = mean_env[:]  
 
                 # plt.plot(t0, max_env)
                 # plt.plot(t0, min_env)
@@ -319,7 +320,7 @@ def power_estimation(r):
             plt.plot(t, Y)
             
         ct += 1
-        plt.legend(['max_env', 'min_env', 'mean_env', 'signal'])
+        plt.legend(['mean_env', 'signal'])
         plt.show()
                 
     #Reference signals matrix 
@@ -361,9 +362,70 @@ def spectrogram_example():
     plt.colorbar()
     plt.show()
 
+def Haar_compression():
+    [t0, X] = test_function.sinusoidal_function()  
+    t0 = t0 / amax(t0)
+
+    #Reshape to fit a power of 2. 
+    [t, Y] = rectangular_signal.reshape_2pow(t0, X) 
+
+    Y_h = haar.haar_1d ( len(Y), Y )
+
+    plt.figure()
+    plt.plot(t, Y)
+    plt.xlabel('$\it{t}$ [s]')
+    plt.ylabel('$\it{X(t)}$', rotation=0)
+    plt.title('Sinusoidal function')
+
+    plt.figure()
+    plt.plot(t, Y_h)
+    plt.xlabel('')
+    plt.ylabel('$\it{H}$', rotation=0)
+    plt.title('Haar Transform')
+
+    #Filter
+    comp_ratio = 1./2
+    Y_h[int(comp_ratio*len(Y_h)):-1] = 0.0
+    Y_inv =   haar.haar_1d_inverse (len(Y_h), Y_h)
+
+    plt.figure()
+    plt.plot(t, Y_inv)
+    plt.xlabel('$\it{t}$ [s]')
+    plt.ylabel('$\it{X(t)}$', rotation=0)
+    plt.title('Reconstructed signal with' + str(int(1./comp_ratio)) + ':1 compression')
+    plt.show()
+
+def Haar_compression_error():
+    s_rate = array([2**i for i in range(10, 19)])
+    rmse = [] 
+    for r in s_rate:
+        [t0, X] = test_function.sinusoidal_function_rate(r)  
+        t0 = t0 / amax(t0)
+
+        #Reshape to fit a power of 2. 
+        [t, Y] = rectangular_signal.reshape_2pow(t0, X) 
+
+        Y_h = haar.haar_1d ( len(Y), Y )
+
+        #Filter
+        comp_ratio = 1./8
+        Y_h[int(comp_ratio*len(Y_h)):-1] = 0.0
+        Y_inv =   haar.haar_1d_inverse (len(Y_h), Y_h)
+
+        rmse.append(sqrt(sum((Y-Y_inv)**2.)/len(Y)))
+
+    plt.figure()
+    plt.semilogy(s_rate, rmse)
+    plt.xlabel('$\it{sampling \,  rate}$ [Hz]', fontsize=18)
+    plt.ylabel('$\it{RMSE}$', rotation=0, fontsize=18)
+    plt.xticks(fontsize=18)
+    plt.yticks(fontsize=18)
+    plt.title('Compression error for a ' + str(int(1./comp_ratio)) + ':1 compression')
+    plt.show()
+
 if __name__ == "__main__":
     #Run examples 
-    bispectrum_example()
+    # bispectrum_example()
 
     # VMD_example()
 
@@ -375,7 +437,11 @@ if __name__ == "__main__":
 
     # spectrogram_example()
 
-    # power_estimation(0)
+    # power_estimation()
+
+    # Haar_compression()
+
+    Haar_compression_error()
     
     #Phase shift test 
     # x = [] 

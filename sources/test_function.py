@@ -71,6 +71,14 @@ def sinusoidal_function():
 
     return [t,y] 
 
+def sinusoidal_function_rate(n):
+    t = linspace(0,1,n)
+    y = zeros(len(t))
+
+    y = 4*sin(2*pi*10 * t) + 2*sin(2*pi*30 * t) + 1*sin(2*pi*50 * t)
+
+    return [t,y] 
+
 def sinusoidal_function_f_mod():
     t = linspace(0,1,1000)
     y = zeros(len(t))
