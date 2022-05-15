@@ -31,7 +31,7 @@ def user_examples(N):
     5) Haar compression error with the sampling rate.
     6) Haar series expansion.
     7) Haar Pattern Decomposition and Classification (HPDC).
-    8) Haar Pattern Decomposition and Classification (HPDC): prediction error.
+    8) Haar Pattern Decomposition and Classification (HPDC): Classification coefficients' error.
     9) CNN classification (several methods).
 
     Intent(in): N(integer), example selected;
@@ -410,14 +410,14 @@ def user_examples(N):
         plt.show()
 
     def example8():
-        """Time series Haar Pattern Decomposition and Classification (HPDC): classification coefficients error.
+        """Time series Haar Pattern Decomposition and Classification (HPDC): classification coefficients' error.
 
         Intent(in): None
 
         Returns: None
         """
 
-        print('Example8: Haar Pattern Decomposition and Classification, classification coefficients error.')
+        print("Example8: Haar Pattern Decomposition and Classification, classification coefficients' error.")
   
         order = 4 # Maximum order to perform the Haar series expansion: 2**order coeffcicients
         use_env = False # Set to True to use the mean envelope as a pattern 
@@ -715,7 +715,7 @@ if __name__ == "__main__":
         5) Haar compression error with the sampling rate.\n 
         6) Haar series expansion.\n 
         7) Haar Pattern Decomposition and Classification (HPDC).\n
-        8) Haar Pattern Decomposition and Classification (HPDC): Cassification coefficients error.\n 
+        8) Haar Pattern Decomposition and Classification (HPDC): Classification coefficients' error.\n 
         9) CNN classification (several methods).\n 
         """)
 
@@ -735,94 +735,4 @@ if __name__ == "__main__":
     # EWT_example()
 
     # EMD_example()
-
-    # power_estimation()
-
-
-
-
-    # signal = [] 
-    # signal_coef = [] 
-    # name_list = {'W_Computers':4, 'W_Lights':4, 'W_Gas_boiler':4} 
-    # ct = 0
-    # for name in name_list.keys():
-    #     [t0, X] = test_function.read('data/Sanse/20220301.plt', name) 
-    #     t0 = t0 / amax(t0)
-    #     Z = zeros(len(X))
-    #     Z[:] = X[:]  
-    #     #Mean value filter 
-    #     for _ in range(0,50):
-    #         Z = fortran_ts.time_series.mvf(asfortranarray(Z), 0)
-
-    #     #Reshape to fit a power of 2. 
-    #     [t, Y] = rectangular_signal.reshape_2pow(t0, Z) 
-
-    #     #Haar series expansion
-    #     order = name_list[name] 
-    #     c_haar = rectangular_signal.haar_coef(t, Y, order)
-    #     N = len(t)
-    #     c = zeros(N)
-    #     Y_haar = ones(N)
-    #     Y_haar = Y_haar * mean(Y) 
-
-    #     signal_coef.append([])
-    #     signal_coef[ct].append(mean(Y))
-
-    #     for m in range(0, order):
-    #         for n in range(0, 2**m):
-    #             for i in range(0, N):
-    #                 c[i] = rectangular_signal.phi(t[i], m, n) * c_haar[m][n]  
-    #             signal_coef[ct].append(c_haar[m][n]) 
-    #             Y_haar  = Y_haar + c 
-
-    #     N_coef = sum(array([2**i for i in range(0,order)])) + 1
-    #     print('Reshaped signal:', len(Y), 'points')
-    #     print('Haar signal:', N_coef, 'coefficients')
-    #     noise = random.normal(0, 0.1*amax(Y_haar), len(Y_haar))
-    #     Y_haar = Y_haar + noise
-    #     signal.append(Y_haar)
-    #     ct += 1
-
-    #     plt.figure()
-    #     plt.plot(t0, X, 'g')
-    #     plt.plot(t, Y, 'c')
-    #     plt.plot(t, Y_haar, 'b')
-    #     plt.xlabel('t [h]')
-    #     plt.ylabel('P [W]')
-    #     plt.title('Power consumption' + name)
-    #     plt.show()
-
-    # signal_coef = transpose(array(signal_coef))
-    # print(type(signal_coef), signal_coef.shape)
-
-    # general = 0.4*signal[0] + 0.6*signal[1] + signal[2] 
-    # c_haar = rectangular_signal.haar_coef(t, general, order)
-    # general_coef = [mean(general)]
-    # for m in range(0, order):
-    #     for n in range(0, 2**m):
-    #           general_coef.append(c_haar[m][n])
-    # general_coef = transpose(array(general_coef))
-    # print(type(general_coef), general_coef.shape)
-
-    # #Solve linear system
-    # x = lstsq(signal_coef, general_coef, rcond=None)[0]
-    # print(x)  
-
-    #Haar transform
- 
-
-
-    # VMD clustering 
-    # VMD_modes = 2
-    # u = clustering.VMD_clustering(t, general, VMD_modes)
-
-    # plt.figure()
-    # plt.xlabel('t')
-    # plt.ylabel('X (t)')
-    # plt.title('VMD') 
-    # for i in range(0, VMD_modes):
-    #     plt.subplot(VMD_modes, 1, i+1)
-    #     plt.plot(t, u[i, :])
-
-    # plt.show()
 
