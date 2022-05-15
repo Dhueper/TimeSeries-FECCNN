@@ -135,10 +135,12 @@ def user_examples(N):
         f, t, Sxx = spectrogram(X, fs, nperseg=128)
         f_max = len(f)//3
 
+        plt.figure()
         plt.pcolormesh(t, f[0:f_max], Sxx[0:f_max,:], shading='gouraud')
         plt.ylabel('$\it{f}$ [Hz]', rotation=0)
         plt.xlabel('$\it{t}$ [s]')
         plt.colorbar()
+        plt.title('Spectrogram')
         plt.show()
 
     def example4():
@@ -286,7 +288,7 @@ def user_examples(N):
         print('Invalid case selected. Select an example from 1 to 8.')
 
     #Switch case dictionary 
-    switcher = {1: example1, 2:example2, 3:example3, 4:example4, 5:example5, 6:example6, 7:example7, 8:example8, 9:example9, 10:example10}
+    switcher = {1: example1, 2:example2, 3:example3, 4:example4, 5:example5, 6:example6}
     #Get the function from switcher dictionary  
     example = switcher.get(N, example_invalid)
 
@@ -579,11 +581,12 @@ if __name__ == "__main__":
         """)
 
         option = input("Select an example from 0 to 8: ")
-        if option == '0':
+        if int(option) == 0:
             run = False
         else:
             user_examples(int(option))
-        run = True
+        
+        # run = False
 
 
     #Run examples 
