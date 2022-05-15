@@ -22,22 +22,165 @@ import rectangular_signal
 import haar
 import fortran_ts
 
-#%%Bispectrum 
-def bispectrum_example():
-    [t, X] = test_function.sinusoidal_function_f_mod()
+def user_examples(N):
+    """Pre-defined examples to introduce new users to time series feature extraction and classification:
+    1) Spectral and statistical feature extraction.
+    2) Bispectral transform.
+    3) Spectrogram.
+    4) Time series compression through the Haar transform..
+    5) Haar series expansion.
+    6) Haar Pattern Decomposition and Classification (HPDC).
+    7) CNN classification (several methods).
 
-    plt.figure()
-    plt.plot(t,X)
-    plt.xlabel('t')
-    plt.ylabel('X (t)')
-    plt.title('Sinusoidal function') 
+    Intent(in): N(integer), example selected;
 
-    bs = bispectrum.bispectral_transform(t, X)
+    Returns: None
+    """
 
-    plt.figure()
-    bs.plot_mag()
-    plt.show()
+    def plot(t,X):
+        plt.figure()
+        plt.plot(t,X)
+        plt.xlabel('t')
+        plt.ylabel('X(t)')
+        plt.title('Original time series')
 
+    def example1():
+        """Time series spectral and statistical feature extraction.
+
+        Intent(in): None
+
+        Returns: None
+        """
+
+        print('Example 1: Spectral and statistical feature extraction.')
+
+        [t, X] = test_function.sinusoidal_function()
+        plot(t,X)
+
+        Features = feature_extraction.Features(t, X)
+
+        Mean = Features.Mean()
+        print("Mean: M=", Mean)
+
+        Max, Min = Features.Max_Min()
+        print("Maximum: Max=", Max)
+        print("Minimum: Min=", Min)
+
+        SPW = Features.SPow()
+        print("Spectral Power: SPW=", SPW)
+
+        SE = Features.SEnt()
+        print("Spectral Entropy: SE=", SE)
+
+        SP, fP = Features.SPeak()
+        print("Spectral Peak: SP=", SP)
+        print("Peak frequency: fP=", fP)
+
+        SC = Features.SCen()
+        print("Spectral Centroid: SC=", SC)
+
+        AM, FM, E = Features.BW()
+        print("AM bandwidth: AM=", AM)
+        print("FM bandwidth: FM=", FM)
+        print("Energy: E=", E)
+
+        V, HM, HC = Features.Hjorth()
+        print("Variance: Var=", V)
+        print("Hjorth Mobility: HM=", HM)
+        print("Hjorth Complexity: HC=", HC)
+
+        SK = Features.Skew()
+        print("Skewness: SK=", SK)
+
+        KT = Features.Kurt()
+        print("Kurtosis: KT=", KT)
+
+        plt.show()
+
+    def example2():
+        """Time series bispectral transform.
+
+        Intent(in): None
+
+        Returns: None
+        """
+
+        print('Example 2: Bispectral transform.')
+
+        [t, X] = test_function.sinusoidal_function_f_mod()
+
+        plot(t,X)
+
+        bs = bispectrum.bispectral_transform(t, X)
+
+        plt.figure()
+        bs.plot_mag()
+        plt.show()
+
+    def example3():
+        """Time series spectrogram.
+
+        Intent(in): None
+
+        Returns: None
+        """
+
+        print('Example 3: Spectrogram.')
+
+        [t, X] = test_function.sinusoidal_function_f_mod()
+        plot(t,X)
+
+        fs = 1./(t[1] - t[0])
+        f, t, Sxx = spectrogram(X, fs, nperseg=128)
+        f_max = len(f)//3
+
+        plt.pcolormesh(t, f[0:f_max], Sxx[0:f_max,:], shading='gouraud')
+        plt.ylabel('$\it{f}$ [Hz]', rotation=0)
+        plt.xlabel('$\it{t}$ [s]')
+        plt.colorbar()
+        plt.show()
+
+    def example4():
+        """Time series compression through the Haar transform.
+
+        Intent(in): None
+
+        Returns: None
+        """
+
+        print('Example 4: Compression through the Haar transform.')
+
+        [t0, X] = test_function.sinusoidal_function()  
+        plot(t0,X)
+
+        t0 = t0 / amax(t0)
+
+        #Reshape to fit a power of 2. 
+        [t, Y] = rectangular_signal.reshape_2pow(t0, X) 
+
+        #Haar transform 
+        Y_h = haar.haar_1d ( len(Y), Y )
+
+        plt.figure()
+        plt.plot(t, Y_h)
+        plt.xlabel('')
+        plt.ylabel('$\it{H}$', rotation=0)
+        plt.title('Haar Transform')
+
+        #Compression
+        comp_ratio = 1./2
+
+        Y_h[int(comp_ratio*len(Y_h)):-1] = 0.0
+        Y_inv =   haar.haar_1d_inverse (len(Y_h), Y_h)
+
+        plt.figure()
+        plt.plot(t, Y_inv)
+        plt.xlabel('$\it{t}$ [s]')
+        plt.ylabel('$\it{X(t)}$', rotation=0)
+        plt.title('Reconstructed signal with' + str(int(1./comp_ratio)) + ':1 compression')
+        plt.show()
+
+        
 
 #%% VMD clustering 
 def VMD_example():
@@ -185,48 +328,6 @@ def EMD_example():
 
     plt.show()
 
-def feature_extraction_example():
-    [t, X] = test_function.sinusoidal_function()
-
-    Features = feature_extraction.Features(t, X)
-
-    Mean = Features.Mean()
-    print("Mean: M=", Mean)
-
-    Max, Min = Features.Max_Min()
-    print("Maximum: Max=", Max)
-    print("Minimum: Min=", Min)
-
-    SPW = Features.SPow()
-    print("Spectral Power: SPW=", SPW)
-
-    SE = Features.SEnt()
-    print("Spectral Entropy: SE=", SE)
-
-    SP, fP = Features.SPeak()
-    print("Spectral Peak: SP=", SP)
-    print("Peak frequency: fP=", fP)
-
-    SC = Features.SCen()
-    print("Spectral Centroid: SC=", SC)
-
-    AM, FM, E = Features.BW()
-    print("AM bandwidth: AM=", AM)
-    print("FM bandwidth: FM=", FM)
-    print("Energy: E=", E)
-
-    V, HM, HC = Features.Hjorth()
-    print("Variance: Var=", V)
-    print("Hjorth Mobility: HM=", HM)
-    print("Hjorth Complexity: HC=", HC)
-
-    SK = Features.Skew()
-    print("Skewness: SK=", SK)
-
-    KT = Features.Kurt()
-    print("Kurtosis: KT=", KT)
-
-    # print(Features.fdict)
 
 def power_estimation():
     name_list = {'W_Air_cond':4, 'W_Gas_boiler':4} 
@@ -348,19 +449,6 @@ def power_estimation():
     print('sigma ratio:', sqrt(var_ratio))
     print('RMSE ratio:', rmse_ratio)
     return abs(x - array(mean_ratio)), abs(x - array(signal_ratio))
-
-def spectrogram_example():
-    [t, X] = test_function.sinusoidal_function_f_mod()
-    fs = 1./(t[1] - t[0])
-    f, t, Sxx = spectrogram(X, fs, nperseg=128)
-    f_max = len(f)//3
-    plt.pcolormesh(t, f[0:f_max], Sxx[0:f_max,:], shading='gouraud')
-    plt.ylabel('$\it{f}$ [Hz]', fontsize=18, rotation=0)
-    plt.xlabel('$\it{t}$ [s]', fontsize=18)
-    plt.xticks(fontsize=18)
-    plt.yticks(fontsize=18)
-    plt.colorbar()
-    plt.show()
 
 def Haar_compression():
     [t0, X] = test_function.sinusoidal_function()  
