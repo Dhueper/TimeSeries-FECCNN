@@ -3,7 +3,7 @@ import sys
 import random
 
 from matplotlib import pyplot as plt
-from numpy import zeros, mean, asfortranarray, linspace, amax, amin, ones, sum, array, transpose, sqrt, var, abs
+from numpy import zeros, mean, asfortranarray, linspace, amax, amin, ones, sum, array, transpose, sqrt, var, abs, arange
 from numpy.linalg import lstsq
 from numpy import random
 from scipy.interpolate import interp1d
@@ -31,7 +31,8 @@ def user_examples(N):
     5) Haar compression error with the sampling rate.
     6) Haar series expansion.
     7) Haar Pattern Decomposition and Classification (HPDC).
-    8) CNN classification (several methods).
+    8) Haar Pattern Decomposition and Classification (HPDC): prediction error.
+    9) CNN classification (several methods).
 
     Intent(in): N(integer), example selected;
 
@@ -228,7 +229,6 @@ def user_examples(N):
         plt.legend(legend)
         plt.show()
         
-
     def example6():
         """Time series Haar series expansion.
 
@@ -284,11 +284,272 @@ def user_examples(N):
 
         plt.show()
 
+    def example7():
+        """Time series Haar Pattern Decomposition and Classification (HPDC).
+
+        Intent(in): None
+
+        Returns: None
+        """
+
+        print('Example7: Haar Pattern Decomposition and Classification.')
+  
+        order = 4 # Maximum order to perform the Haar series expansion: 2**order coeffcicients
+        use_env = False # Set to True to use the mean envelope as a pattern 
+
+        signal_coef = [] 
+        signal_general = [] 
+        mean_ratio = []
+        var_ratio = []
+        rmse_ratio = []
+        ct = 0
+
+        name_list = ['W_Air_cond', 'W_Gas_boiler'] # Power signals tag 
+
+        for name in name_list:
+            plt.figure()
+            plt.title(name)
+            plt.xlabel('t [h]')
+            plt.ylabel('P [W]')
+
+            for i in range(0,2):
+                [t0, X] = test_function.read('data/Sanse/2022030'+str(1 + 7*i)+'.plt', name) 
+                if i == 0:
+                    ## Use envelope as pattern
+                    if use_env:
+                        env = zeros((7, len(X)))
+                        env[0,:]  = array(X)[:] 
+                        X2 = zeros(len(X))
+                        for j in range(1, 7):
+                            [t1, X1] = test_function.read('data/Sanse/2022030'+str(1 + 7*i + j)+'.plt', name)
+                            X2[0:min(len(X1), len(X2))]  = array(X1)[0:min(len(X1), len(X2))] 
+                            env[j,:] = X2[:]  
+                        # max_env = amax(env, axis=0) # Maximum envelope 
+                        # min_env = amin(env, axis=0) # Minimum envelope 
+                        mean_env = mean(env, axis=0) # Mean envelope 
+                        X[:] = mean_env[:]  
+
+                elif i == 1:
+                    r = 0 # Artificial signal shift (useful to check the effect of shift on simple cases)  
+                    p = 1 # Artificial scale (useful to check the effect of scaling on simple cases)
+
+                    X1 = zeros(len(X))
+                    X1[:] = X[:]
+                    X[r:len(X)] = X1[0:len(X)-r]   
+                    X[0:r] = X1[len(X)-r:len(X)]   
+                    X = p * X
+                    
+
+                t0 = t0 / amax(t0)
+                Z = zeros(len(X))
+                Z[:] = X[:]  
+
+                #Mean value filter from: https://github.com/Dhueper/TimeSeries-AnomalyDetection
+                for _ in range(0,50):
+                    Z = fortran_ts.time_series.mvf(asfortranarray(Z), 0)
+
+                #Reshape to fit a power of 2. 
+                [t, Y] = rectangular_signal.reshape_2pow(t0, Z)
+
+                if i == 0: # Save reference pattern signal of class 'name'  
+
+                    #Haar series expansion
+                    c_haar = rectangular_signal.haar_coef(t, Y, order)
+
+                    # Create quality ratios 
+                    mean_ratio.append(mean(Y))
+                    var_ratio.append(var(Y))
+                    rmse_ratio.append(Y)
+
+                    #Save Haar coefficients 
+                    signal_coef.append([])
+                    signal_coef[ct].append(mean(Y))
+
+                    for m in range(0, order):
+                        for n in range(0, 2**m): 
+                            signal_coef[ct].append(c_haar[m][n]) 
+
+                else:
+                    signal_general.append(Y)
+                    mean_ratio[ct] = 1. / ( mean_ratio[ct] / mean(Y) )
+                    var_ratio[ct] = 1. / ( var_ratio[ct] / var(Y) )
+                    rmse_ratio[ct] = sqrt(sum(Y**2.) / len(Y)) / sqrt(sum(rmse_ratio[ct]**2.) / len(Y)) 
+
+                plt.plot(t, Y)
+                
+            ct += 1
+            plt.legend(['Pattern', 'signal'])
+                    
+        #Reference signal's matrix 
+        signal_coef = transpose(array(signal_coef))
+        print(type(signal_coef), signal_coef.shape)
+
+        #General power signal 
+        general = array(signal_general[0][:])
+        for i in range(1, len(signal_general)):
+            general = general + array(signal_general[i][:])
+
+        c_haar = rectangular_signal.haar_coef(t, general, order)
+        general_coef = [mean(general)]
+        for m in range(0, order):
+            for n in range(0, 2**m):
+                general_coef.append(c_haar[m][n])
+        general_coef = transpose(array(general_coef))
+        print(type(general_coef), general_coef.shape)
+
+        #Solve linear system
+        x = lstsq(signal_coef, general_coef, rcond=None)[0]
+        print()
+        print("System's solution:", x) 
+        print()
+        print('Mean ratio:', mean_ratio)
+        print('sigma ratio:', sqrt(var_ratio))
+        print('RMSE ratio:', rmse_ratio)
+        print()
+
+        plt.show()
+
+    def example8():
+        """Time series Haar Pattern Decomposition and Classification (HPDC): classification coefficients error.
+
+        Intent(in): None
+
+        Returns: None
+        """
+
+        print('Example8: Haar Pattern Decomposition and Classification, classification coefficients error.')
+  
+        order = 4 # Maximum order to perform the Haar series expansion: 2**order coeffcicients
+        use_env = False # Set to True to use the mean envelope as a pattern 
+
+        mean_error = [] 
+        sigma_error = [] 
+        rmse_error = [] 
+
+        for k in range(0,7):
+            signal_coef = [] 
+            signal_general = [] 
+            mean_ratio = []
+            var_ratio = []
+            rmse_ratio = []
+            ct = 0
+
+            name_list = ['W_Air_cond', 'W_Gas_boiler'] # Power signals tag 
+
+            for name in name_list:
+                for i in range(0,2): 
+                    if i == 0:
+                        [t0, X] = test_function.read('data/Sanse/2022030'+str(1)+'.plt', name)
+                        ## Use envelope as pattern
+                        if use_env:
+                            env = zeros((7, len(X)))
+                            env[0,:]  = array(X)[:] 
+                            X2 = zeros(len(X))
+                            for j in range(1, 7):
+                                [t1, X1] = test_function.read('data/Sanse/2022030'+str(1 + j)+'.plt', name)
+                                X2[0:min(len(X1), len(X2))]  = array(X1)[0:min(len(X1), len(X2))] 
+                                env[j,:] = X2[:]  
+                            # max_env = amax(env, axis=0) # Maximum envelope 
+                            # min_env = amin(env, axis=0) # Minimum envelope 
+                            mean_env = mean(env, axis=0) # Mean envelope 
+                            X[:] = mean_env[:]  
+
+                    elif i == 1:
+                        [t0, X] = test_function.read('data/Sanse/2022030'+str(2 + k)+'.plt', name)
+                        r = 0 # Artificial signal shift (useful to check the effect of shift on simple cases)  
+                        p = 1 # Artificial scale (useful to check the effect of scaling on simple cases)
+
+                        X1 = zeros(len(X))
+                        X1[:] = X[:]
+                        X[r:len(X)] = X1[0:len(X)-r]   
+                        X[0:r] = X1[len(X)-r:len(X)]   
+                        X = p * X
+                        
+
+                    t0 = t0 / amax(t0)
+                    Z = zeros(len(X))
+                    Z[:] = X[:]  
+
+                    #Mean value filter from: https://github.com/Dhueper/TimeSeries-AnomalyDetection
+                    for _ in range(0,50):
+                        Z = fortran_ts.time_series.mvf(asfortranarray(Z), 0)
+
+                    #Reshape to fit a power of 2. 
+                    [t, Y] = rectangular_signal.reshape_2pow(t0, Z)
+
+                    if i == 0: # Save reference pattern signal of class 'name'  
+
+                        #Haar series expansion
+                        c_haar = rectangular_signal.haar_coef(t, Y, order)
+
+                        # Create quality ratios 
+                        mean_ratio.append(mean(Y))
+                        var_ratio.append(var(Y))
+                        rmse_ratio.append(Y)
+
+                        #Save Haar coefficients 
+                        signal_coef.append([])
+                        signal_coef[ct].append(mean(Y))
+
+                        for m in range(0, order):
+                            for n in range(0, 2**m): 
+                                signal_coef[ct].append(c_haar[m][n]) 
+
+                    else:
+                        signal_general.append(Y)
+                        mean_ratio[ct] = 1. / ( mean_ratio[ct] / mean(Y) )
+                        var_ratio[ct] = 1. / ( var_ratio[ct] / var(Y) )
+                        rmse_ratio[ct] = sqrt(sum(Y**2.) / len(Y)) / sqrt(sum(rmse_ratio[ct]**2.) / len(Y)) 
+                    
+                ct += 1
+                        
+            #Reference signal's matrix 
+            signal_coef = transpose(array(signal_coef))
+
+            #General power signal 
+            general = array(signal_general[0][:])
+            for i in range(1, len(signal_general)):
+                general = general + array(signal_general[i][:])
+
+            c_haar = rectangular_signal.haar_coef(t, general, order)
+            general_coef = [mean(general)]
+            for m in range(0, order):
+                for n in range(0, 2**m):
+                    general_coef.append(c_haar[m][n])
+            general_coef = transpose(array(general_coef))
+
+            #Solve linear system
+            x = lstsq(signal_coef, general_coef, rcond=None)[0]
+
+            mean_error.append(sum(abs(x - array(mean_ratio)))/len(x))
+            sigma_error.append(sum(abs(x - sqrt(array(var_ratio))))/len(x))
+            rmse_error.append(sum(abs(x - array(rmse_ratio)))/len(x))
+
+
+        #Bar plot
+        barWidth = 0.25
+
+        br1 = arange(len(mean_error))
+        br2 = [i + barWidth for i in br1]
+        br3 = [i + barWidth for i in br2] 
+
+        plt.figure()
+        plt.bar(br1, mean_error, label='Mean error', color='r', width = barWidth, edgecolor ='grey')
+        plt.bar(br2, sigma_error, label='Sigma error', color='b', width = barWidth, edgecolor ='grey')
+        plt.bar(br3, rmse_error, label='RMSE error', color='g', width = barWidth, edgecolor ='grey')
+        plt.xlabel('days')
+        plt.ylabel('abs error')
+        plt.xticks([r + barWidth for r in range(len(mean_error))],
+        ['1', '2', '3', '4', '5', '6', '7'])
+        plt.title('Classification coefficients error during a week')
+        plt.legend()
+        plt.show()
+
     def example_invalid():
-        print('Invalid case selected. Select an example from 1 to 8.')
+        print('Invalid case selected. Select an example from 1 to 9.')
 
     #Switch case dictionary 
-    switcher = {1: example1, 2:example2, 3:example3, 4:example4, 5:example5, 6:example6}
+    switcher = {1: example1, 2:example2, 3:example3, 4:example4, 5:example5, 6:example6, 7:example7, 8:example8}
     #Get the function from switcher dictionary  
     example = switcher.get(N, example_invalid)
 
@@ -441,129 +702,6 @@ def EMD_example():
     plt.show()
 
 
-def power_estimation():
-    name_list = {'W_Air_cond':4, 'W_Gas_boiler':4} 
-    signal_coef = [] 
-    signal_general = [] 
-    signal_ratio = [] 
-    mean_ratio = []
-    var_ratio = []
-    rmse_ratio = []
-    order = 4
-    ct = 0
-    use_env = False
-    for name in name_list.keys():
-        plt.figure()
-        plt.title(name)
-        plt.xlabel('t [h]')
-        plt.ylabel('P [W]')
-
-        for i in range(0,2):
-            [t0, X] = test_function.read('data/Sanse/2022030'+str(1 + 7*i)+'.plt', name) 
-            if i == 0:
-                ## Use envelope as pattern
-                if use_env:
-                    env = zeros((7, len(X)))
-                    env[0,:]  = array(X)[:] 
-                    X2 = zeros(len(X))
-                    for j in range(1, 7):
-                        [t1, X1] = test_function.read('data/Sanse/2022030'+str(1 + 7*i + j)+'.plt', name)
-                        X2[0:min(len(X1), len(X2))]  = array(X1)[0:min(len(X1), len(X2))] 
-                        env[j,:] = X2[:]  
-                    max_env = amax(env, axis=0)
-                    min_env = amin(env, axis=0)
-                    mean_env = mean(env, axis=0)
-                    X[:] = mean_env[:]  
-
-                # plt.plot(t0, max_env)
-                # plt.plot(t0, min_env)
-                # plt.plot(t0, mean_env)
-
-            elif i == 1:
-                # r = random.randint(0, int(30*len(X)/(24*60))) #Shift phase up to 30 min
-                # p = 1 + (random.randint(0, 10) - 5)/10.
-                r = 0
-                p = 1
-
-                X1 = zeros(len(X))
-                X1[:] = X[:]
-                X[r:len(X)] = X1[0:len(X)-r]   
-                X[0:r] = X1[len(X)-r:len(X)]   
-                X = p * X
-                 
-
-            t0 = t0 / amax(t0)
-            Z = zeros(len(X))
-            Z[:] = X[:]  
-            #Mean value filter 
-            for _ in range(0,50):
-                Z = fortran_ts.time_series.mvf(asfortranarray(Z), 0)
-
-            #Reshape to fit a power of 2. 
-            [t, Y] = rectangular_signal.reshape_2pow(t0, Z)
-
-            if i == 0: # Reference signal of class 'name'  
-
-                #Haar series expansion
-                c_haar = rectangular_signal.haar_coef(t, Y, order)
-
-                signal_coef.append([])
-                signal_coef[ct].append(mean(Y)) 
-
-                signal_ratio.append(Y)
-                mean_ratio.append(mean(Y))
-                var_ratio.append(var(Y))
-                rmse_ratio.append(Y)
-
-                for m in range(0, order):
-                    for n in range(0, 2**m):
-                        # for i in range(0, N):
-                        #     c[i] = rectangular_signal.phi(t[i], m, n) * c_haar[m][n]  
-                        signal_coef[ct].append(c_haar[m][n]) 
-
-
-            else:
-                signal_general.append(Y)
-                signal_ratio[ct] = 1. / ( sum(signal_ratio[ct] / Y) / len(Y) )
-                mean_ratio[ct] = 1. / ( mean_ratio[ct] / mean(Y) )
-                var_ratio[ct] = 1. / ( var_ratio[ct] / var(Y) )
-                # rmse_ratio[ct] =   sqrt(sum((signal_ratio[ct] - Y)**2.) / len(Y)) 
-                rmse_ratio[ct] = sqrt(sum(Y**2.) / len(Y)) / sqrt(sum(rmse_ratio[ct]**2.) / len(Y)) 
-
-            plt.plot(t, Y)
-            
-        ct += 1
-        plt.legend(['mean_env', 'signal'])
-        plt.show()
-                
-    #Reference signals matrix 
-    signal_coef = transpose(array(signal_coef))
-    print(type(signal_coef), signal_coef.shape)
-
-    #General power signal 
-    general = array(signal_general[0][:])
-    for i in range(1, len(signal_general)):
-        general = general + array(signal_general[i][:])
-
-    c_haar = rectangular_signal.haar_coef(t, general, order)
-    general_coef = [mean(general)]
-    for m in range(0, order):
-        for n in range(0, 2**m):
-              general_coef.append(c_haar[m][n])
-    general_coef = transpose(array(general_coef))
-    print(type(general_coef), general_coef.shape)
-
-    #Solve linear system
-    x = lstsq(signal_coef, general_coef, rcond=None)[0]
-    print('System solution:', x) 
-    print('Mean ratio:', mean_ratio)
-    print('Signal ratio:', signal_ratio)
-    print('sigma ratio:', sqrt(var_ratio))
-    print('RMSE ratio:', rmse_ratio)
-    return abs(x - array(mean_ratio)), abs(x - array(signal_ratio))
-
-
-
 if __name__ == "__main__":
 
     run = True
@@ -576,8 +714,9 @@ if __name__ == "__main__":
         4) Time series compression through the Haar transform.\n 
         5) Haar compression error with the sampling rate.\n 
         6) Haar series expansion.\n 
-        7) Haar Pattern Decomposition and Classification (HPDC).\n 
-        8) CNN classification (several methods).\n 
+        7) Haar Pattern Decomposition and Classification (HPDC).\n
+        8) Haar Pattern Decomposition and Classification (HPDC): Cassification coefficients error.\n 
+        9) CNN classification (several methods).\n 
         """)
 
         option = input("Select an example from 0 to 8: ")
