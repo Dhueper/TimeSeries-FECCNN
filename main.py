@@ -27,14 +27,15 @@ def user_examples(N):
     1) Spectral and statistical feature extraction.
     2) Bispectral transform.
     3) Spectrogram.
-    4) Time series compression through the Haar transform..
-    5) Haar series expansion.
-    6) Haar Pattern Decomposition and Classification (HPDC).
-    7) CNN classification (several methods).
+    4) Time series compression through the Haar transform.
+    5) Haar compression error with the sampling rate.
+    6) Haar series expansion.
+    7) Haar Pattern Decomposition and Classification (HPDC).
+    8) CNN classification (several methods).
 
     Intent(in): N(integer), example selected;
 
-    Returns: None
+    Returns: function, example.
     """
 
     def plot(t,X):
@@ -180,7 +181,116 @@ def user_examples(N):
         plt.title('Reconstructed signal with' + str(int(1./comp_ratio)) + ':1 compression')
         plt.show()
 
+    def example5():
+        """Time series Haar compression error as a function of the sampling rate.
+
+        Intent(in): None
+
+        Returns: None
+        """
+
+        print('Example 5: Haar compression error.')
+
+        s_rate = array([2**i for i in range(10, 19)]) # Sampling rate 
+        rmse = [] 
+        error = [] 
+        max_comp = 4 #Maximum compression ratio will be 2**max_comp 
+        plt.figure()
+
+        for r in s_rate:
+            [t0, X] = test_function.sinusoidal_function_rate(r)  
+            t0 = t0 / amax(t0)
+
+            #Reshape to fit a power of 2. 
+            [t, Y] = rectangular_signal.reshape_2pow(t0, X) 
+
+            Y_h = haar.haar_1d ( len(Y), Y ) # Haar transform 
+
+            #Compression
+            rmse = [] 
+            for j in range(1, max_comp+1):
+                comp_ratio = 1./2**j
+                Y_h[int(comp_ratio*len(Y_h)):-1] = 0.0
+                Y_inv =   haar.haar_1d_inverse (len(Y_h), Y_h)
+                rmse.append(sqrt(sum((Y-Y_inv)**2.)/len(Y)))
+            error.append(rmse)
+
+        error = array(error).T
+        legend = [] 
+        for j in range(0,max_comp):
+            plt.semilogy(s_rate, error[j,:])
+            legend.append(str(int(2**(j+1))) + ':1')
+        plt.xlabel('$\it{sampling \,  rate}$ [Hz]')
+        plt.ylabel('$\it{RMSE}$', rotation=0)
+        plt.title('Compression error for different compression ratios')
+        plt.legend(legend)
+        plt.show()
         
+
+    def example6():
+        """Time series Haar series expansion.
+
+        Intent(in): None
+
+        Returns: None
+        """
+
+        print('Example 6: Haar series expansion.')
+
+        name = 'W_Gas_boiler'
+        [t0, X] = test_function.read('data/Sanse/20220301.plt', name) 
+        plot(t0,X)
+
+        t0 = t0 / amax(t0)
+        Z = zeros(len(X))
+        Z[:] = X[:]  
+
+        #Mean value filter from: https://github.com/Dhueper/TimeSeries-AnomalyDetection
+        for _ in range(0,50):
+            Z = fortran_ts.time_series.mvf(asfortranarray(Z), 0)
+
+        #Reshape to fit a power of 2. 
+        [t, Y] = rectangular_signal.reshape_2pow(t0, Z) 
+
+        #Haar series expansion
+        order =  6
+        c_haar = rectangular_signal.haar_coef(t, Y, order)
+        N = len(t)
+        c = zeros(N)
+        Y_haar = ones(N)
+        Y_haar = Y_haar * mean(Y) 
+
+        for m in range(0, order):
+            for n in range(0, 2**m):
+                for i in range(0, N):
+                    c[i] = rectangular_signal.phi(t[i], m, n) * c_haar[m][n]  
+                Y_haar  = Y_haar + c 
+
+        plt.figure()
+        plt.plot(t0, X, 'g')
+        plt.plot(t, Y, 'c')
+        plt.plot(t, Y_haar, 'b')
+        plt.xlabel('t [h]')
+        plt.ylabel('P [W]')
+        plt.title('Power consumption')
+        plt.legend(['Original time series', 'Filtered time series', 'Haar expansion'])
+
+        N_coef = sum(array([2**i for i in range(0,order)])) + 1
+        print('Haar signal:', N_coef, 'coefficients')
+        print('Haar coefficients:')
+        print(c_haar)
+
+        plt.show()
+
+    def example_invalid():
+        print('Invalid case selected. Select an example from 1 to 8.')
+
+    #Switch case dictionary 
+    switcher = {1: example1, 2:example2, 3:example3, 4:example4, 5:example5, 6:example6, 7:example7, 8:example8, 9:example9, 10:example10}
+    #Get the function from switcher dictionary  
+    example = switcher.get(N, example_invalid)
+
+    return example()
 
 #%% VMD clustering 
 def VMD_example():
@@ -450,80 +560,33 @@ def power_estimation():
     print('RMSE ratio:', rmse_ratio)
     return abs(x - array(mean_ratio)), abs(x - array(signal_ratio))
 
-def Haar_compression():
-    [t0, X] = test_function.sinusoidal_function()  
-    t0 = t0 / amax(t0)
 
-    #Reshape to fit a power of 2. 
-    [t, Y] = rectangular_signal.reshape_2pow(t0, X) 
-
-    Y_h = haar.haar_1d ( len(Y), Y )
-
-    plt.figure()
-    plt.plot(t, Y)
-    plt.xlabel('$\it{t}$ [s]')
-    plt.ylabel('$\it{X(t)}$', rotation=0)
-    plt.title('Sinusoidal function')
-
-    plt.figure()
-    plt.plot(t, Y_h)
-    plt.xlabel('')
-    plt.ylabel('$\it{H}$', rotation=0)
-    plt.title('Haar Transform')
-
-    #Filter
-    comp_ratio = 1./2
-    Y_h[int(comp_ratio*len(Y_h)):-1] = 0.0
-    Y_inv =   haar.haar_1d_inverse (len(Y_h), Y_h)
-
-    plt.figure()
-    plt.plot(t, Y_inv)
-    plt.xlabel('$\it{t}$ [s]')
-    plt.ylabel('$\it{X(t)}$', rotation=0)
-    plt.title('Reconstructed signal with' + str(int(1./comp_ratio)) + ':1 compression')
-    plt.show()
-
-def Haar_compression_error():
-    s_rate = array([2**i for i in range(10, 19)])
-    rmse = [] 
-    error = [] 
-    max_comp = 4 #Maximum compression ratio will be 2**max_comp 
-    plt.figure()
-    for r in s_rate:
-        [t0, X] = test_function.sinusoidal_function_rate(r)  
-        t0 = t0 / amax(t0)
-
-        #Reshape to fit a power of 2. 
-        [t, Y] = rectangular_signal.reshape_2pow(t0, X) 
-
-        Y_h = haar.haar_1d ( len(Y), Y )
-
-        #Filter
-        rmse = [] 
-        for j in range(1, max_comp+1):
-            comp_ratio = 1./2**j
-            Y_h[int(comp_ratio*len(Y_h)):-1] = 0.0
-            Y_inv =   haar.haar_1d_inverse (len(Y_h), Y_h)
-
-            rmse.append(sqrt(sum((Y-Y_inv)**2.)/len(Y)))
-        error.append(rmse)
-
-    error = array(error).T
-    legend = [] 
-    for j in range(0,max_comp):
-        plt.semilogy(s_rate, error[j,:])
-        legend.append(str(int(2**(j+1))) + ':1')
-    plt.xlabel('$\it{sampling \,  rate}$ [Hz]', fontsize=18)
-    plt.ylabel('$\it{RMSE}$', rotation=0, fontsize=18)
-    plt.xticks(fontsize=18)
-    plt.yticks(fontsize=18)
-    plt.title('Compression error for different compression ratios')
-    plt.legend(legend, fontsize=18)
-    plt.show()
 
 if __name__ == "__main__":
+
+    run = True
+    while run:
+        print(""" Select an introductory pre-defined example:\n 
+        0) Exit\n 
+        1) Spectral and statistical feature extraction.\n 
+        2) Bispectral transform.\n 
+        3) Spectrogram.\n 
+        4) Time series compression through the Haar transform.\n 
+        5) Haar compression error with the sampling rate.\n 
+        6) Haar series expansion.\n 
+        7) Haar Pattern Decomposition and Classification (HPDC).\n 
+        8) CNN classification (several methods).\n 
+        """)
+
+        option = input("Select an example from 0 to 8: ")
+        if option == '0':
+            run = False
+        else:
+            user_examples(int(option))
+        run = True
+
+
     #Run examples 
-    # bispectrum_example()
 
     # VMD_example()
 
@@ -531,39 +594,7 @@ if __name__ == "__main__":
 
     # EMD_example()
 
-    feature_extraction_example()
-
-    # spectrogram_example()
-
     # power_estimation()
-
-    # Haar_compression()
-
-    # Haar_compression_error()
-    
-    #Phase shift test 
-    # x = [] 
-    # y = [] 
-    # phase_s = array([i for i in range(0, 200)])
-    # for r in phase_s:
-    #     print()
-    #     print('r=', r)
-    #     m_ratio, s_ratio = power_estimation(r)
-    #     x.append(m_ratio)
-    #     y.append(s_ratio)
-    #     plt.close('all')
-    # x = array(x)
-    # y = array(y)
-    # plt.figure()
-    # plt.plot(phase_s, x)
-    # plt.title('Mean ratio')
-    # plt.xlabel('phase shift')
-
-    # plt.figure()
-    # plt.plot(phase_s, y)
-    # plt.title('Signal ratio')
-    # plt.xlabel('phase shift')
-    # plt.show()
 
 
 
