@@ -38,6 +38,22 @@ def CNN_haar_model(input_shape, output_shape):
 
     return model
 
+def CNN_spectrogram_model(input_shape, output_shape):
+    #Spectrogram model 
+    model = Sequential()
+    model.add(Conv2D(32, kernel_size=3, activation='relu', input_shape=input_shape))
+    model.add(MaxPooling2D(pool_size=(2,2), padding='same'))
+    model.add(Dropout(0.1))
+    model.add(Conv2D(64, kernel_size=2, activation='relu'))
+    model.add(MaxPooling2D(pool_size=(2,2), padding='same'))
+    model.add(Dropout(0.1))
+    model.add(Flatten())
+    model.add(Dense(output_shape, activation='softmax'))
+
+    model.compile(optimizer='adam', loss='categorical_crossentropy', metrics=['accuracy'])
+
+    return model
+
 def CNN_model(input_shape, output_shape):
     #Bispectrum model 
     model = Sequential()
@@ -84,9 +100,11 @@ def autoencoder_model(input_shape):
 
 def run_CNN():
     N = 4
-    size = 21
+    # size = 21
     # size = 8
-    CNN = CNN_model((size, size,1), N)
+    size_x = 9
+    size_y = 6
+    CNN = CNN_spectrogram_model((size_x, size_y,1), N)
     CNN.summary()
     # (X_train, y_train), (X_test, y_test) = mnist.load_data()
 
@@ -102,10 +120,10 @@ def run_CNN():
 
     # print(y_train[0] )
 
-    X_train = load('ElectricDevices/X_train.npy')
-    X_test = load('ElectricDevices/X_test.npy')
-    y_train = load('ElectricDevices/Y_train.npy')
-    y_test = load('ElectricDevices/Y_test.npy')
+    # X_train = load('ElectricDevices/X_train_bispectrum.npy')
+    # X_test = load('ElectricDevices/X_test_bispectrum.npy')
+    # y_train = load('ElectricDevices/Y_train_bispectrum.npy')
+    # y_test = load('ElectricDevices/Y_test_bispectrum.npy')
 
     # X_train = load('ElectricDevices/X_train_haar.npy')
     # X_test = load('ElectricDevices/X_test_haar.npy')
@@ -117,7 +135,9 @@ def run_CNN():
     # print(X_test.shape)
     # print(y_test.shape)
 
-    CNN.fit(X_train, y_train, validation_data=(X_test, y_test), epochs=20, batch_size=32)
+    # CNN.fit(X_train, y_train, validation_data=(X_test, y_test), epochs=20, batch_size=32)
+
+
 
     # tags = ['W_Air_cond','W_Computers','W_Audio_TV','W_Lights','W_Kitchen','W_Washing_m','W_Dish_w','W_Gas_boiler','W_Oven_vitro'] 
     # classes = {} 

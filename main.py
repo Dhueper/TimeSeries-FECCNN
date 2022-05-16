@@ -35,6 +35,7 @@ def user_examples(N):
     8) Haar Pattern Decomposition and Classification (HPDC): Classification coefficients' error.
     9) CNN classification: bispectrum as input.
     10) CNN classification: Haar coefficients as input.
+    11) CNN classification: spectrogram as input.
 
     Intent(in): N(integer), example selected;
 
@@ -593,11 +594,36 @@ def user_examples(N):
 
         CNN.fit(X_train, y_train, validation_data=(X_test, y_test), epochs=40, batch_size=32)
 
+    def example11():
+        """Time series classification with CNN (Convolutional Neural Networks) using the spectrogram as input.
+        Network trained and tested with a database of power signals.
+
+        Intent(in): None
+
+        Returns: None
+        """
+
+        print('Example 11: CNN classification (spectrogram).')
+
+        N = 4
+        size_x = 9
+        size_y = 6
+        CNN = neural_network.CNN_spectrogram_model((size_x, size_y,1), N)
+        CNN.summary()
+
+        X_train = load('ElectricDevices/X_train_spectrogram.npy')
+        X_test = load('ElectricDevices/X_test_spectrogram.npy')
+        y_train = load('ElectricDevices/Y_train_spectrogram.npy')
+        y_test = load('ElectricDevices/Y_test_spectrogram.npy')
+
+        CNN.fit(X_train, y_train, validation_data=(X_test, y_test), epochs=30, batch_size=32)
+
     def example_invalid():
-        print('Invalid case selected. Select an example from 1 to 10.')
+        print('Invalid case selected. Select an example from 1 to 11.')
 
     #Switch case dictionary 
-    switcher = {1: example1, 2:example2, 3:example3, 4:example4, 5:example5, 6:example6, 7:example7, 8:example8, 9:example9, 10:example10}
+    switcher = {1: example1, 2:example2, 3:example3, 4:example4, 5:example5, 6:example6, 7:example7, 8:example8, 9:example9,
+     10:example10, 11:example11}
     #Get the function from switcher dictionary  
     example = switcher.get(N, example_invalid)
 
@@ -766,9 +792,10 @@ if __name__ == "__main__":
         8) Haar Pattern Decomposition and Classification (HPDC): Classification coefficients' error.\n 
         9) CNN classification: bispectrum as input.\n 
         10) CNN classification: Haar coefficients as input.\n 
+        11) CNN classification: spectrogram as input.\n 
         """)
 
-        option = input("Select an example from 0 to 10: ")
+        option = input("Select an example from 0 to 11: ")
         if int(option) == 0:
             run = False
         else:
