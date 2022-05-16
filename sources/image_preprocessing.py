@@ -5,6 +5,7 @@ import time
 from matplotlib import pyplot as plt
 from numpy import zeros, mean, linspace, array, linalg, save, asfortranarray
 from scipy.interpolate import interp1d
+from scipy.signal import spectrogram
 
 from keras.utils import to_categorical
 
@@ -18,7 +19,7 @@ import bispectrum
 import rectangular_signal
 import fortran_ts
 
-def process_raw_dataset():
+def process_raw_dataset_bispectrum():
 
     t0 = time.time()
 
@@ -51,8 +52,8 @@ def process_raw_dataset():
 
     print('t=', tf-t0)
 
-    # save('ElectricDevices/X_test.npy', X_test)
-    # save('ElectricDevices/Y_test.npy', Y_test)
+    # save('ElectricDevices/X_test_bispectrum.npy', X_test)
+    # save('ElectricDevices/Y_test_bispectrum.npy', Y_test)
 
 def process_raw_dataset_haar():
 
@@ -100,6 +101,44 @@ def process_raw_dataset_haar():
 
     save('ElectricDevices/X_test_haar.npy', X_test)
     save('ElectricDevices/Y_test_haar.npy', Y_test)
+
+def process_raw_dataset_spectrogram():
+
+    t0 = time.time()
+
+    [X, Y] = test_function.read_dataset('ElectricDevices/ElectricDevices_TEST.txt') 
+
+    t = linspace(0, 24*60, len(X[0,:]))
+    fs = 1./(t[1] - t[0])
+    f_max = 9
+
+    X_test = [] 
+    Y_test = [] 
+
+    for i in range(0, len(X[:,0])):
+        if Y[i] < 6 and Y[i]>1: 
+            f, ts, Sxx = spectrogram(X[i,:], fs, nperseg=16)
+
+            X_test.append(Sxx[0:f_max,:])
+            Y_test.append(Y[i]-1)
+
+    X_test = array(X_test)
+    X_test = X_test.reshape(len(X_test),9,6,1)
+
+    Y_test = array(Y_test)
+    Y_test = Y_test -1.0
+    Y_test = to_categorical(Y_test)
+
+    print(X_test.shape)
+
+    print(Y_test.shape)
+
+    tf = time.time()
+
+    print('t=', tf-t0)
+
+    save('ElectricDevices/X_test_spectrogram.npy', X_test)
+    save('ElectricDevices/Y_test_spectrogram.npy', Y_test)
 
 def process_raw_data():
 
@@ -241,8 +280,10 @@ def process_signal(t, X):
     return [t95, X95] 
 
 if __name__ == "__main__":
-    # process_raw_dataset()
-    process_raw_dataset_haar()
+    # process_raw_dataset_bispectrum()
+    # process_raw_dataset_haar()
+    process_raw_dataset_spectrogram()
+
     # process_raw_data()
     # process_autoencoder_data()
     # process_autoencoder_dataset()

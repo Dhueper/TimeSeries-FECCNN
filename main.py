@@ -34,6 +34,7 @@ def user_examples(N):
     7) Haar Pattern Decomposition and Classification (HPDC).
     8) Haar Pattern Decomposition and Classification (HPDC): Classification coefficients' error.
     9) CNN classification: bispectrum as input.
+    10) CNN classification: Haar coefficients as input.
 
     Intent(in): N(integer), example selected;
 
@@ -559,7 +560,7 @@ def user_examples(N):
 
         N = 4
         size = 21
-        CNN = neural_network.CNN_model((size, size,1), N)
+        CNN = neural_network.CNN_bispectrum_model((size, size,1), N)
         CNN.summary()
 
         X_train = load('ElectricDevices/X_train_bispectrum.npy')
@@ -569,11 +570,34 @@ def user_examples(N):
 
         CNN.fit(X_train, y_train, validation_data=(X_test, y_test), epochs=20, batch_size=32)
 
+    def example10():
+        """Time series classification with CNN (Convolutional Neural Networks) using the Haar coefficients as input.
+        Network trained and tested with a database of power signals.
+
+        Intent(in): None
+
+        Returns: None
+        """
+
+        print('Example 10: CNN classification (Haar coefficients).')
+
+        N = 4
+        size = 8
+        CNN = neural_network.CNN_haar_model((size, size,1), N)
+        CNN.summary()
+
+        X_train = load('ElectricDevices/X_train_haar.npy')
+        X_test = load('ElectricDevices/X_test_haar.npy')
+        y_train = load('ElectricDevices/Y_train_haar.npy')
+        y_test = load('ElectricDevices/Y_test_haar.npy')
+
+        CNN.fit(X_train, y_train, validation_data=(X_test, y_test), epochs=40, batch_size=32)
+
     def example_invalid():
-        print('Invalid case selected. Select an example from 1 to 9.')
+        print('Invalid case selected. Select an example from 1 to 10.')
 
     #Switch case dictionary 
-    switcher = {1: example1, 2:example2, 3:example3, 4:example4, 5:example5, 6:example6, 7:example7, 8:example8, 9:example9}
+    switcher = {1: example1, 2:example2, 3:example3, 4:example4, 5:example5, 6:example6, 7:example7, 8:example8, 9:example9, 10:example10}
     #Get the function from switcher dictionary  
     example = switcher.get(N, example_invalid)
 
@@ -741,15 +765,16 @@ if __name__ == "__main__":
         7) Haar Pattern Decomposition and Classification (HPDC).\n
         8) Haar Pattern Decomposition and Classification (HPDC): Classification coefficients' error.\n 
         9) CNN classification: bispectrum as input.\n 
+        10) CNN classification: Haar coefficients as input.\n 
         """)
 
-        option = input("Select an example from 0 to 9: ")
+        option = input("Select an example from 0 to 10: ")
         if int(option) == 0:
             run = False
         else:
             user_examples(int(option))
         
-        # run = False
+        run = False
 
 
     #Run examples 
