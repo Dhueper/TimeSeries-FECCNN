@@ -54,6 +54,22 @@ def CNN_spectrogram_model(input_shape, output_shape):
 
     return model
 
+def CNN_features_model(input_shape, output_shape):
+    #Spectral and statistical features model 
+    model = Sequential()
+    model.add(Conv2D(64, kernel_size=3, activation='relu', input_shape=input_shape))
+    model.add(MaxPooling2D(pool_size=(2,2), strides=(1,1), padding='same'))
+    model.add(Dropout(0.1))
+    model.add(Conv2D(32, kernel_size=2, activation='relu', input_shape=input_shape))
+    model.add(MaxPooling2D(pool_size=(2,2), strides=(1,1), padding='same'))
+    model.add(Dropout(0.1))
+    model.add(Flatten())
+    model.add(Dense(output_shape, activation='softmax'))
+
+    model.compile(optimizer='adam', loss='categorical_crossentropy', metrics=['accuracy'])
+
+    return model
+
 def CNN_model(input_shape, output_shape):
     #Bispectrum model 
     model = Sequential()
@@ -102,9 +118,10 @@ def run_CNN():
     N = 4
     # size = 21
     # size = 8
-    size_x = 9
-    size_y = 6
-    CNN = CNN_spectrogram_model((size_x, size_y,1), N)
+    # size_x = 9
+    # size_y = 6
+    size = 4
+    CNN = CNN_features_model((4, 4,1), N)
     CNN.summary()
     # (X_train, y_train), (X_test, y_test) = mnist.load_data()
 

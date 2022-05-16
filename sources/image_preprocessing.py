@@ -17,6 +17,7 @@ except:
 import test_function
 import bispectrum
 import rectangular_signal
+import feature_extraction
 import fortran_ts
 
 def process_raw_dataset_bispectrum():
@@ -139,6 +140,60 @@ def process_raw_dataset_spectrogram():
 
     save('ElectricDevices/X_test_spectrogram.npy', X_test)
     save('ElectricDevices/Y_test_spectrogram.npy', Y_test)
+
+def process_raw_dataset_features():
+
+    t0 = time.time()
+
+    [X, Y] = test_function.read_dataset('ElectricDevices/ElectricDevices_TEST.txt') 
+
+    t1 = linspace(0, 24*60, len(X[0,:]))
+
+    X_test = [] 
+    Y_test = [] 
+
+    for i in range(0, len(X[:,0])):
+        if Y[i] < 6 and Y[i]>1: 
+            coef = []
+            Features = feature_extraction.Features(t1, X[i,:])
+            Mean = Features.Mean()
+            Max, Min = Features.Max_Min()
+            SPW = Features.SPow()
+            SE = Features.SEnt()
+            SP, fP = Features.SPeak()
+            SC = Features.SCen()
+            AM, FM, E = Features.BW()
+            V, HM, HC = Features.Hjorth()
+            SK = Features.Skew()
+            KT = Features.Kurt()
+
+            features_dict = Features.fdict
+            for key in features_dict.keys():
+                coef.append(features_dict[key])
+
+            coef = array(coef)
+            coef.reshape(4, 4)
+
+            X_test.append(coef)
+            Y_test.append(Y[i]-1)
+
+    X_test = array(X_test)
+    X_test = X_test.reshape(len(X_test),4, 4,1)
+
+    Y_test = array(Y_test)
+    Y_test = Y_test -1.0
+    Y_test = to_categorical(Y_test)
+
+    print(X_test.shape)
+
+    print(Y_test.shape)
+
+    tf = time.time()
+
+    print('t=', tf-t0)
+
+    save('ElectricDevices/X_test_features.npy', X_test)
+    save('ElectricDevices/Y_test_features.npy', Y_test)
 
 def process_raw_data():
 
@@ -282,7 +337,8 @@ def process_signal(t, X):
 if __name__ == "__main__":
     # process_raw_dataset_bispectrum()
     # process_raw_dataset_haar()
-    process_raw_dataset_spectrogram()
+    # process_raw_dataset_spectrogram()
+    process_raw_dataset_features()
 
     # process_raw_data()
     # process_autoencoder_data()
