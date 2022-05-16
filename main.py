@@ -3,7 +3,7 @@ import sys
 import random
 
 from matplotlib import pyplot as plt
-from numpy import zeros, mean, asfortranarray, linspace, amax, amin, ones, sum, array, transpose, sqrt, var, abs, arange
+from numpy import zeros, mean, asfortranarray, linspace, amax, amin, ones, sum, array, transpose, sqrt, var, abs, arange, load
 from numpy.linalg import lstsq
 from numpy import random
 from scipy.interpolate import interp1d
@@ -20,6 +20,7 @@ import clustering
 import feature_extraction
 import rectangular_signal
 import haar
+import neural_network
 import fortran_ts
 
 def user_examples(N):
@@ -32,7 +33,7 @@ def user_examples(N):
     6) Haar series expansion.
     7) Haar Pattern Decomposition and Classification (HPDC).
     8) Haar Pattern Decomposition and Classification (HPDC): Classification coefficients' error.
-    9) CNN classification (several methods).
+    9) CNN classification: bispectrum as input.
 
     Intent(in): N(integer), example selected;
 
@@ -239,7 +240,7 @@ def user_examples(N):
 
         print('Example 6: Haar series expansion.')
 
-        name = 'W_Gas_boiler'
+        name = 'W_Computers'
         [t0, X] = test_function.read('data/Sanse/20220301.plt', name) 
         plot(t0,X)
 
@@ -275,7 +276,7 @@ def user_examples(N):
         plt.xlabel('t [h]')
         plt.ylabel('P [W]')
         plt.title('Power consumption')
-        plt.legend(['Original time series', 'Filtered time series', 'Haar expansion'])
+        plt.legend(['Original time series', 'Filtered time series', 'Haar expansion: order '+str(order)])
 
         N_coef = sum(array([2**i for i in range(0,order)])) + 1
         print('Haar signal:', N_coef, 'coefficients')
@@ -545,11 +546,34 @@ def user_examples(N):
         plt.legend()
         plt.show()
 
+    def example9():
+        """Time series classification with CNN (Convolutional Neural Networks) using the bispectrum as input.
+        Network trained and tested with a database of power signals.
+
+        Intent(in): None
+
+        Returns: None
+        """
+
+        print('Example 9: CNN classification (bispectrum).')
+
+        N = 4
+        size = 21
+        CNN = neural_network.CNN_model((size, size,1), N)
+        CNN.summary()
+
+        X_train = load('ElectricDevices/X_train_bispectrum.npy')
+        X_test = load('ElectricDevices/X_test_bispectrum.npy')
+        y_train = load('ElectricDevices/Y_train_bispectrum.npy')
+        y_test = load('ElectricDevices/Y_test_bispectrum.npy')
+
+        CNN.fit(X_train, y_train, validation_data=(X_test, y_test), epochs=20, batch_size=32)
+
     def example_invalid():
         print('Invalid case selected. Select an example from 1 to 9.')
 
     #Switch case dictionary 
-    switcher = {1: example1, 2:example2, 3:example3, 4:example4, 5:example5, 6:example6, 7:example7, 8:example8}
+    switcher = {1: example1, 2:example2, 3:example3, 4:example4, 5:example5, 6:example6, 7:example7, 8:example8, 9:example9}
     #Get the function from switcher dictionary  
     example = switcher.get(N, example_invalid)
 
@@ -716,10 +740,10 @@ if __name__ == "__main__":
         6) Haar series expansion.\n 
         7) Haar Pattern Decomposition and Classification (HPDC).\n
         8) Haar Pattern Decomposition and Classification (HPDC): Classification coefficients' error.\n 
-        9) CNN classification (several methods).\n 
+        9) CNN classification: bispectrum as input.\n 
         """)
 
-        option = input("Select an example from 0 to 8: ")
+        option = input("Select an example from 0 to 9: ")
         if int(option) == 0:
             run = False
         else:

@@ -6,6 +6,38 @@ from keras.datasets import mnist
 from numpy import load, argmax, sum, random, clip
 from matplotlib import pyplot as plt
 
+def CNN_bispectrum_model(input_shape, output_shape):
+    #Bispectrum model 
+    model = Sequential()
+    model.add(Conv2D(32, kernel_size=3, activation='relu', input_shape=input_shape))
+    model.add(MaxPooling2D(pool_size=(3,3), padding='same'))
+    model.add(Dropout(0.1))
+    model.add(Conv2D(32, kernel_size=5, activation='relu'))
+    model.add(MaxPooling2D(pool_size=(4,4), padding='same'))
+    model.add(Dropout(0.1))
+    model.add(Flatten())
+    model.add(Dense(output_shape, activation='softmax'))
+
+    model.compile(optimizer='adam', loss='categorical_crossentropy', metrics=['accuracy'])
+
+    return model
+
+def CNN_haar_model(input_shape, output_shape):
+    #Haar model 
+    model = Sequential()
+    model.add(Conv2D(32, kernel_size=3, activation='relu', input_shape=input_shape))
+    model.add(MaxPooling2D(pool_size=(2,2), padding='same'))
+    model.add(Dropout(0.1))
+    model.add(Conv2D(64, kernel_size=2, activation='relu'))
+    model.add(MaxPooling2D(pool_size=(2,2), padding='same'))
+    model.add(Dropout(0.1))
+    model.add(Flatten())
+    model.add(Dense(output_shape, activation='softmax'))
+
+    model.compile(optimizer='adam', loss='categorical_crossentropy', metrics=['accuracy'])
+
+    return model
+
 def CNN_model(input_shape, output_shape):
     #Bispectrum model 
     model = Sequential()
