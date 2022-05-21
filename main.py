@@ -3,7 +3,7 @@ import sys
 import random
 
 from matplotlib import pyplot as plt
-from numpy import zeros, mean, asfortranarray, linspace, amax, amin, ones, sum, array, transpose, sqrt, var, abs, arange, load
+from numpy import zeros, mean, asfortranarray, linspace, amax, amin, ones, sum, array, transpose, sqrt, var, abs, arange, load, round
 from numpy.linalg import lstsq
 from numpy import random
 from scipy.interpolate import interp1d
@@ -379,7 +379,7 @@ def user_examples(N):
                     var_ratio[ct] = 1. / ( var_ratio[ct] / var(Y) )
                     rmse_ratio[ct] = sqrt(sum(Y**2.) / len(Y)) / sqrt(sum(rmse_ratio[ct]**2.) / len(Y)) 
 
-                plt.plot(t, Y)
+                plt.plot(24*t, Y)
                 
             ct += 1
             plt.legend(['Pattern', 'signal'])
@@ -392,6 +392,12 @@ def user_examples(N):
         general = array(signal_general[0][:])
         for i in range(1, len(signal_general)):
             general = general + array(signal_general[i][:])
+
+        plt.figure()
+        plt.plot(24*t, general, 'tab:orange')
+        plt.xlabel('t [h]')
+        plt.ylabel('P [W]')
+        plt.title('General signal')
 
         c_haar = rectangular_signal.haar_coef(t, general, order)
         general_coef = [mean(general)]
@@ -406,11 +412,13 @@ def user_examples(N):
         print()
         print("System's solution:", x) 
         print()
-        print('Mean ratio:', mean_ratio)
-        print('sigma ratio:', sqrt(var_ratio))
-        print('RMSE ratio:', rmse_ratio)
+        print('Mean ratio:', mean_ratio, '; Error:', 100*abs((x-mean_ratio)/x),'%')
+        print('sigma ratio:', sqrt(var_ratio), '; Error:', 100*abs((x-sqrt(var_ratio))/x),'%')
+        print('RMSE ratio:', rmse_ratio, '; Error:', 100*abs((x-rmse_ratio)/x),'%')
         print()
 
+        s_rate = round(array([100, 100])-100*abs((x-rmse_ratio)/x),2)
+        plt.legend(['Decomposition success rate: '+ str(s_rate[0]) + ', ' + str(s_rate[1]) + ' %'])
         plt.show()
 
     def example8():
