@@ -3,7 +3,7 @@ import sys
 import random
 
 from matplotlib import pyplot as plt
-from numpy import zeros, mean, asfortranarray, linspace, amax, amin, ones, sum, array, transpose, sqrt, var, abs, arange, load, round
+from numpy import zeros, mean, asfortranarray, linspace, amax, amin, ones, sum, array, transpose, sqrt, var, abs, arange, load, round, log10
 from numpy.linalg import lstsq
 from numpy import random
 from scipy.interpolate import interp1d
@@ -586,6 +586,12 @@ def user_examples(N):
         y_train = load('ElectricDevices/Y_train_bispectrum.npy')
         y_test = load('ElectricDevices/Y_test_bispectrum.npy')
 
+        plt.figure()
+        plt.imshow(X_train[5,:,:])
+        plt.title('Example of bispectrum input')
+        plt.colorbar()
+        plt.show()
+
         CNN.fit(X_train, y_train, validation_data=(X_test, y_test), epochs=20, batch_size=32)
 
     def example10():
@@ -608,6 +614,12 @@ def user_examples(N):
         X_test = load('ElectricDevices/X_test_haar.npy')
         y_train = load('ElectricDevices/Y_train_haar.npy')
         y_test = load('ElectricDevices/Y_test_haar.npy')
+
+        plt.figure()
+        plt.imshow(X_train[1,:,:])
+        plt.title('Example of Haar coefficients input')
+        plt.colorbar()
+        plt.show()
 
         CNN.fit(X_train, y_train, validation_data=(X_test, y_test), epochs=40, batch_size=32)
 
@@ -633,7 +645,13 @@ def user_examples(N):
         y_train = load('ElectricDevices/Y_train_spectrogram.npy')
         y_test = load('ElectricDevices/Y_test_spectrogram.npy')
 
-        CNN.fit(X_train, y_train, validation_data=(X_test, y_test), epochs=30, batch_size=32)
+        plt.figure()
+        plt.imshow(X_train[0,:,:])
+        plt.title('Example of spectrogram input')
+        plt.colorbar()
+        plt.show()
+
+        # CNN.fit(X_train, y_train, validation_data=(X_test, y_test), epochs=30, batch_size=32)
 
     def example12():
         """Time series classification with CNN (Convolutional Neural Networks) using spectral and statistical features as input.
@@ -656,6 +674,12 @@ def user_examples(N):
         X_test = load('ElectricDevices/X_test_features.npy')
         y_train = load('ElectricDevices/Y_train_features.npy')
         y_test = load('ElectricDevices/Y_test_features.npy')
+
+        plt.figure()
+        plt.imshow(log10(X_train[9,:,:]))
+        plt.title('Example of spectral and statistical features input (log scale)')
+        plt.colorbar()
+        plt.show()
 
         CNN.fit(X_train, y_train, validation_data=(X_test, y_test), epochs=10, batch_size=32)
 
