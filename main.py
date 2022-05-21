@@ -437,8 +437,10 @@ def user_examples(N):
         mean_error = [] 
         sigma_error = [] 
         rmse_error = [] 
+        ticks = [] 
 
         for k in range(0,7):
+            ticks.append(str(k+1))
             signal_coef = [] 
             signal_general = [] 
             mean_ratio = []
@@ -459,6 +461,7 @@ def user_examples(N):
                             X2 = zeros(len(X))
                             for j in range(1, 7):
                                 [t1, X1] = test_function.read('data/Sanse/2022030'+str(1 + j)+'.plt', name)
+
                                 X2[0:min(len(X1), len(X2))]  = array(X1)[0:min(len(X1), len(X2))] 
                                 env[j,:] = X2[:]  
                             # max_env = amax(env, axis=0) # Maximum envelope 
@@ -467,7 +470,10 @@ def user_examples(N):
                             X[:] = mean_env[:]  
 
                     elif i == 1:
-                        [t0, X] = test_function.read('data/Sanse/2022030'+str(2 + k)+'.plt', name)
+                        if k<8:
+                            [t0, X] = test_function.read('data/Sanse/2022030'+str(2 + k)+'.plt', name)
+                        else:
+                            [t0, X] = test_function.read('data/Sanse/202203'+str(2 + k)+'.plt', name)
                         r = 0 # Artificial signal shift (useful to check the effect of shift on simple cases)  
                         p = 1 # Artificial scale (useful to check the effect of scaling on simple cases)
 
@@ -533,9 +539,9 @@ def user_examples(N):
             #Solve linear system
             x = lstsq(signal_coef, general_coef, rcond=None)[0]
 
-            mean_error.append(sum(abs(x - array(mean_ratio)))/len(x))
-            sigma_error.append(sum(abs(x - sqrt(array(var_ratio))))/len(x))
-            rmse_error.append(sum(abs(x - array(rmse_ratio)))/len(x))
+            mean_error.append(100*sum(abs((x - array(mean_ratio))/x))/len(x))
+            sigma_error.append(100*sum(abs((x - sqrt(array(var_ratio)))/x))/len(x))
+            rmse_error.append(100*sum(abs((x - array(rmse_ratio))/x))/len(x))
 
 
         #Bar plot
@@ -550,9 +556,9 @@ def user_examples(N):
         plt.bar(br2, sigma_error, label='Sigma error', color='b', width = barWidth, edgecolor ='grey')
         plt.bar(br3, rmse_error, label='RMSE error', color='g', width = barWidth, edgecolor ='grey')
         plt.xlabel('days')
-        plt.ylabel('abs error')
+        plt.ylabel('rel error [%]')
         plt.xticks([r + barWidth for r in range(len(mean_error))],
-        ['1', '2', '3', '4', '5', '6', '7'])
+        ticks)
         plt.title('Classification coefficients error during a week')
         plt.legend()
         plt.show()
