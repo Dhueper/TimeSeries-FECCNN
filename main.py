@@ -272,6 +272,12 @@ def user_examples(N):
                     c[i] = rectangular_signal.phi(t[i], m, n) * c_haar[m][n]  
                 Y_haar  = Y_haar + c 
 
+
+        N_coef = sum(array([2**i for i in range(0,order)])) + 1
+        print('Haar signal:', N_coef, 'coefficients')
+        print('Haar coefficients:')
+        print(c_haar)
+
         plt.figure()
         plt.plot(t0, X, 'g')
         plt.plot(t, Y, 'c')
@@ -279,12 +285,8 @@ def user_examples(N):
         plt.xlabel('t [h]')
         plt.ylabel('P [W]')
         plt.title('Power consumption')
-        plt.legend(['Original time series', 'Filtered time series', 'Haar expansion: order '+str(order)])
-
-        N_coef = sum(array([2**i for i in range(0,order)])) + 1
-        print('Haar signal:', N_coef, 'coefficients')
-        print('Haar coefficients:')
-        print(c_haar)
+        plt.legend(['Original time series: '+str(len(X))+' points', 'Filtered time series: '+str(len(X))+' points',
+        'Haar expansion order '+str(order)+': '+str(N_coef)+' points'])
 
         plt.show()
 
