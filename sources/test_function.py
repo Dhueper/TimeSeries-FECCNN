@@ -123,6 +123,25 @@ def read_dataset(filename):
     file.close()
     return [X, Y] 
 
+def read_mars(filename, name='NPWD2372'): 
+  file = open(filename,'r')
+#   N = len(file.readlines())
+  N = 1000
+  file.seek(0)
+  time = zeros(N-1)
+  x = zeros(N-1)
+  vars = file.readline().split(',')
+  index = vars.index(name)
+
+  for i in range(0,N-1):
+    line = array(file.readline().split(','))
+    time[i] = float(line[0])
+    x[i] = float(line[index])
+
+  file.close()
+  time = (time - time[0])/1000 
+  return time, x
+
 def spectral_entropy():
     t = linspace(0,1,1000)
     y = zeros(len(t))
@@ -172,7 +191,16 @@ def bandwidth_am():
     return [t,y]
 
 if __name__ == "__main__":
-    bandwidth_am()
+    [t, X] = read_mars('data/mars-express-power-3years/train_set/power--2008-08-22_2010-07-10.csv', name='NPWD2451')
+    plt.figure()
+    plt.plot(t/3600,X)
+    plt.xlabel('$\it{t}$ [h]', fontsize=18)
+    plt.ylabel('$\it{I}$ [A]', fontsize=18, rotation=0)
+    plt.xticks(fontsize=18)
+    plt.yticks(fontsize=18)
+    plt.show()
+
+    # bandwidth_am()
 
     # [t, X] = square_function3() 
     # [t, Y] = square_function2() 
