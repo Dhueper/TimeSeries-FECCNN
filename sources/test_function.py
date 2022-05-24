@@ -191,11 +191,13 @@ def bandwidth_am():
     return [t,y]
 
 if __name__ == "__main__":
-    [t, X] = read_mars('data/mars-express-power-3years/train_set/power--2008-08-22_2010-07-10.csv', name='NPWD2451')
+    # [t, X] = read_mars('data/mars-express-power-3years/train_set/power--2008-08-22_2010-07-10.csv', name='NPWD2451')
+    name = 'W_Computers'
+    [t, X] = read('data/Sanse/20220301.plt', name)
     plt.figure()
-    plt.plot(t/3600,X)
+    plt.plot(t,X)
     plt.xlabel('$\it{t}$ [h]', fontsize=18)
-    plt.ylabel('$\it{I}$ [A]', fontsize=18, rotation=0)
+    plt.ylabel('$\it{P}$ [W]', fontsize=18, rotation=0)
     plt.xticks(fontsize=18)
     plt.yticks(fontsize=18)
     plt.show()
