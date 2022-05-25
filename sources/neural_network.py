@@ -2,6 +2,7 @@ from keras.models import Sequential
 from keras.layers import Conv2D, Conv2DTranspose, Dense, MaxPooling2D, Dropout, Flatten
 from keras.utils import to_categorical
 from keras.datasets import mnist
+from keras.optimizers import Adam
 
 from numpy import load, argmax, sum, random, clip
 from matplotlib import pyplot as plt
@@ -57,16 +58,16 @@ def CNN_spectrogram_model(input_shape, output_shape):
 def CNN_features_model(input_shape, output_shape):
     #Spectral and statistical features model 
     model = Sequential()
-    model.add(Conv2D(64, kernel_size=3, activation='relu', input_shape=input_shape))
+    model.add(Conv2D(32, kernel_size=3, activation='relu', input_shape=input_shape))
     model.add(MaxPooling2D(pool_size=(2,2), strides=(1,1), padding='same'))
     model.add(Dropout(0.1))
-    model.add(Conv2D(32, kernel_size=2, activation='relu', input_shape=input_shape))
+    model.add(Conv2D(64, kernel_size=2, activation='relu', input_shape=input_shape))
     model.add(MaxPooling2D(pool_size=(2,2), strides=(1,1), padding='same'))
     model.add(Dropout(0.1))
     model.add(Flatten())
     model.add(Dense(output_shape, activation='softmax'))
 
-    model.compile(optimizer='adam', loss='categorical_crossentropy', metrics=['accuracy'])
+    model.compile(optimizer=Adam(learning_rate=1e-1), loss='categorical_crossentropy', metrics=['accuracy'])
 
     return model
 

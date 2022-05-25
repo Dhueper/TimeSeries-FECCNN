@@ -247,7 +247,9 @@ def user_examples(N):
         [t0, X] = test_function.read('data/Sanse/20220301.plt', name) 
         plot(t0,X)
 
-        t0 = t0 / amax(t0)
+        t_max = amax(t0)
+
+        t0 = t0 / t_max
         Z = zeros(len(X))
         Z[:] = X[:]  
 
@@ -279,11 +281,11 @@ def user_examples(N):
         print(c_haar)
 
         plt.figure()
-        plt.plot(t0, X, 'g')
-        plt.plot(t, Y, 'c')
-        plt.plot(t, Y_haar, 'b')
-        plt.xlabel('t [h]')
-        plt.ylabel('P [W]')
+        plt.plot(t0*t_max, X, 'g')
+        plt.plot(t*t_max, Y, 'c')
+        plt.plot(t*t_max, Y_haar, 'b')
+        plt.xlabel('$\it{t}$ [h]')
+        plt.ylabel('$\it{P}$ [W]', rotation=0)
         plt.title('Power consumption')
         plt.legend(['Original time series: '+str(len(X))+' points', 'Filtered time series: '+str(len(X))+' points',
         'Haar expansion order '+str(order)+': '+str(N_coef)+' points'])
@@ -586,13 +588,13 @@ def user_examples(N):
         y_train = load('ElectricDevices/Y_train_bispectrum.npy')
         y_test = load('ElectricDevices/Y_test_bispectrum.npy')
 
-        plt.figure()
+        plt.figure() 
         plt.imshow(X_train[5,:,:])
         plt.title('Example of bispectrum input')
         plt.colorbar()
         plt.show()
 
-        CNN.fit(X_train, y_train, validation_data=(X_test, y_test), epochs=20, batch_size=32)
+        CNN.fit(X_train, y_train, validation_data=(X_test, y_test), epochs=30, batch_size=32)
 
     def example10():
         """Time series classification with CNN (Convolutional Neural Networks) using the Haar coefficients as input.
@@ -621,7 +623,7 @@ def user_examples(N):
         plt.colorbar()
         plt.show()
 
-        CNN.fit(X_train, y_train, validation_data=(X_test, y_test), epochs=40, batch_size=32)
+        CNN.fit(X_train, y_train, validation_data=(X_test, y_test), epochs=50, batch_size=32)
 
     def example11():
         """Time series classification with CNN (Convolutional Neural Networks) using the spectrogram as input.
@@ -651,7 +653,7 @@ def user_examples(N):
         plt.colorbar()
         plt.show()
 
-        # CNN.fit(X_train, y_train, validation_data=(X_test, y_test), epochs=30, batch_size=32)
+        CNN.fit(X_train, y_train, validation_data=(X_test, y_test), epochs=30, batch_size=32)
 
     def example12():
         """Time series classification with CNN (Convolutional Neural Networks) using spectral and statistical features as input.
@@ -670,18 +672,18 @@ def user_examples(N):
         CNN = neural_network.CNN_features_model((size, size,1), N)
         CNN.summary()
 
-        X_train = load('ElectricDevices/X_train_features.npy')
-        X_test = load('ElectricDevices/X_test_features.npy')
-        y_train = load('ElectricDevices/Y_train_features.npy')
-        y_test = load('ElectricDevices/Y_test_features.npy')
+        X_train = log10(abs(load('ElectricDevices/X_train_features.npy')) + 1)
+        X_test = log10(abs(load('ElectricDevices/X_test_features.npy')) + 1)
+        y_train = load('ElectricDevices/Y_train_features.npy') 
+        y_test = load('ElectricDevices/Y_test_features.npy') 
 
         plt.figure()
-        plt.imshow(log10(X_train[9,:,:]))
+        plt.imshow(X_train[9,:,:])
         plt.title('Example of spectral and statistical features input (log scale)')
         plt.colorbar()
         plt.show()
 
-        CNN.fit(X_train, y_train, validation_data=(X_test, y_test), epochs=10, batch_size=32)
+        CNN.fit(X_train, y_train, validation_data=(X_test, y_test), epochs=20, batch_size=32)
 
     def example_invalid():
         print('Invalid case selected. Select an example from 1 to 12.')
