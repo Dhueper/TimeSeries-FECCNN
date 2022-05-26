@@ -399,8 +399,8 @@ def user_examples(N):
 
         plt.figure()
         plt.plot(24*t, general, 'tab:orange')
-        plt.xlabel('t [h]')
-        plt.ylabel('P [W]')
+        plt.xlabel('$\it{t}$ [h]')
+        plt.ylabel('$\it{P}$ [W]')
         plt.title('General signal')
 
         c_haar = rectangular_signal.haar_coef(t, general, order)
@@ -869,7 +869,7 @@ if __name__ == "__main__":
         else:
             user_examples(int(option))
         
-        run = False
+        # run = False
 
 
     #Run examples 

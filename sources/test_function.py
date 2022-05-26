@@ -192,14 +192,19 @@ def bandwidth_am():
 
 if __name__ == "__main__":
     # [t, X] = read_mars('data/mars-express-power-3years/train_set/power--2008-08-22_2010-07-10.csv', name='NPWD2451')
-    name = 'W_Computers'
+    name = 'W_Gas_boiler'
     [t, X] = read('data/Sanse/20220301.plt', name)
+
+    for _ in range(0,50):
+        X = fortran_ts.time_series.mvf(asfortranarray(X), 0)
+
     plt.figure()
     plt.plot(t,X)
     plt.xlabel('$\it{t}$ [h]', fontsize=18)
     plt.ylabel('$\it{P}$ [W]', fontsize=18, rotation=0)
     plt.xticks(fontsize=18)
     plt.yticks(fontsize=18)
+    plt.legend(['Pattern 2'], loc='upper left')
     plt.show()
 
     # bandwidth_am()
