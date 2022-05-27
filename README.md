@@ -28,13 +28,13 @@ UK database of power signals to evaluate the software performances.
 The selected approach is based on extracting some key features from the time series and use them to transform the time series to a 2D array, which facilitates the subsequent classification.
 Four different methodologies for feature extraction:
 
-![Spectral and statistical features](Figures/Features_input.pdf)
+![Spectral and statistical features](Figures/Features_input.png)
 
-![Bispectrum](Figures/Bispectrum_input.pdf)
+![Bispectrum](Figures/Bispectrum_input.png)
 
-![Spectrogram](Figures/Spectrogram_input.pdf)
+![Spectrogram](Figures/Spectrogram_input.png)
 
-![Haar coefficients](Figures/Haar_input.pdf)
+![Haar coefficients](Figures/Haar_input.png)
 
 ### Classification
 CNN classification using four different inputs.
