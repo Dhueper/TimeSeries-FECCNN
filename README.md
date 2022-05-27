@@ -8,15 +8,16 @@ A way to reduce the information behind these time series is through a feature ex
 This repository allows to perform different approaches to Feature Extraction in time series in order to understand their behaviour. Then, these features can be used as an input to Classify the time series with Neural Networks.
 
 For new users, there are several examples regarding:
-    1) Spectral and statistical feature extraction.
-    2) Bispectral transform.
-    3) Spectrogram.
-    4) Time series compression through the Haar transform.
-    5) Haar compression error with the sampling rate.
-    6) Haar series expansion.
-    7) Haar Pattern Decomposition and Classification (HPDC).
-    8) Haar Pattern Decomposition and Classification (HPDC): Classification coefficients' error.
-    9) CNN classification: bispectrum as input.
+
+   1) Spectral and statistical feature extraction.
+   2) Bispectral transform.
+   3) Spectrogram.
+   4) Time series compression through the Haar transform.
+   5) Haar compression error with the sampling rate.
+   6) Haar series expansion.
+   7) Haar Pattern Decomposition and Classification (HPDC).
+   8) Haar Pattern Decomposition and Classification (HPDC): Classification coefficients' error.
+   9) CNN classification: bispectrum as input.
    10) CNN classification: Haar coefficients as input.
    11) CNN classification: spectrogram as input.
    12) CNN classification: spectral and statistical features as input.
