@@ -60,7 +60,10 @@ def user_examples(N):
 
         print('Example 1: Spectral and statistical feature extraction.')
 
-        [t, X] = test_function.read_mars('data/mars-express-power-3years/train_set/power--2008-08-22_2010-07-10.csv', name='NPWD2451')
+        # To run this example download Mars Express dataset:
+        # https://kelvins.esa.int/mars-express-power-challenge/data/
+        # [t, X] = test_function.read_mars('data/mars-express-power-3years/train_set/power--2008-08-22_2010-07-10.csv', name='NPWD2451')
+        [t, X] = test_function.sinusoidal_function() 
         plot(t,X)
 
         Features = feature_extraction.Features(t, X)
