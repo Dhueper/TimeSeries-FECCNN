@@ -42,8 +42,8 @@ b) Bispectrum
 
 <p align="center">
   <img 
-    width="550"
-    height="600"
+    width="650"
+    height="512"
     src="Figures/Bispectrum_input.png"
   >
 </p>
