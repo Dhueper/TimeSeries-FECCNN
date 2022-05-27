@@ -42,8 +42,8 @@ b) Bispectrum
 
 <p align="center">
   <img 
-    width="512"
-    height="700"
+    width="550"
+    height="600"
     src="Figures/Bispectrum_input.png"
   >
 </p>
@@ -52,7 +52,7 @@ c) Spectrogram
 
 <p align="center">
   <img 
-    width="256"
+    width="350"
     height="512"
     src="Figures/Spectrogram_input.png"
   >
