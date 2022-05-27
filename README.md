@@ -30,7 +30,8 @@ Four different methodologies for feature extraction:
 
 ![Spectral and statistical features](Figures/Features_input.png)
 
-![Bispectrum](Figures/Bispectrum_input.png)
+b) Bispectrum
+<img src="Figures/Bispectrum_input.png" width="128"/>
 
 ![Spectrogram](Figures/Spectrogram_input.png)
 
