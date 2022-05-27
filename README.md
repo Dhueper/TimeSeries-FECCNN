@@ -74,8 +74,8 @@ Used as a tool to model power signals and simplify their analysis.
 
 <p align="center">
   <img 
-    width="1024"
-    height="512"
+    width="900"
+    height="550"
     src="Figures/Haar_series_computer.png"
   >
 </p>
