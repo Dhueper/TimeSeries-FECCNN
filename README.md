@@ -43,14 +43,30 @@ b) Bispectrum
 <p align="center">
   <img 
     width="512"
-    height="512"
+    height="700"
     src="Figures/Bispectrum_input.png"
   >
 </p>
 
-![Spectrogram](Figures/Spectrogram_input.png)
+c) Spectrogram
 
-![Haar coefficients](Figures/Haar_input.png)
+<p align="center">
+  <img 
+    width="256"
+    height="512"
+    src="Figures/Spectrogram_input.png"
+  >
+</p>
+
+d) Haar coefficients
+
+<p align="center">
+  <img 
+    width="512"
+    height="512"
+    src="Figures/Haar_input.png"
+  >
+</p>
 
 ### Classification
 CNN classification using four different inputs.
