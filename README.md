@@ -63,7 +63,7 @@ d) Haar coefficients
 
 <p align="center">
   <img 
-    width="512"
+    width="600"
     height="512"
     src="Figures/Haar_input.png"
   >
