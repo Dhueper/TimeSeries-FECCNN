@@ -69,6 +69,18 @@ d) Haar coefficients
   >
 </p>
 
+### Haar wavelet expansion
+Used as a tool to model power signals and simplify their analysis.
+
+<p align="center">
+  <img 
+    width="1024"
+    height="512"
+    src="Figures/Haar_series_computer.png"
+  >
+</p>
+
+
 ### Classification
 CNN classification using four different inputs.
 
