@@ -1,3 +1,4 @@
+"""Preprocessing: time series to images module"""
 import sys
 import os
 import time
@@ -21,6 +22,12 @@ import feature_extraction
 import fortran_ts
 
 def process_raw_dataset_bispectrum():
+    """ Transforms the time series from the dataset to 2D arrays (bispectrum) and saves the images.
+
+    Intent(in): None
+
+    Returns: None
+    """
 
     t0 = time.time()
 
@@ -57,6 +64,12 @@ def process_raw_dataset_bispectrum():
     # save('ElectricDevices/Y_test_bispectrum.npy', Y_test)
 
 def process_raw_dataset_haar():
+    """ Transforms the time series from the dataset to 2D arrays (Haar coefficients) and saves the images.
+
+    Intent(in): None
+
+    Returns: None
+    """
 
     t0 = time.time()
 
@@ -104,6 +117,12 @@ def process_raw_dataset_haar():
     save('ElectricDevices/Y_test_haar.npy', Y_test)
 
 def process_raw_dataset_spectrogram():
+    """ Transforms the time series from the dataset to 2D arrays (spectrogram) and saves the images.
+
+    Intent(in): None
+
+    Returns: None
+    """
 
     t0 = time.time()
 
@@ -142,6 +161,12 @@ def process_raw_dataset_spectrogram():
     save('ElectricDevices/Y_test_spectrogram.npy', Y_test)
 
 def process_raw_dataset_features():
+    """ Transforms the time series from the dataset to 2D arrays (spectral and statistical features) and saves the images.
+
+    Intent(in): None
+
+    Returns: None
+    """
 
     t0 = time.time()
 
@@ -196,6 +221,12 @@ def process_raw_dataset_features():
     save('ElectricDevices/Y_test_features.npy', Y_test)
 
 def process_raw_data():
+    """ Transforms the time series from example power signals to 2D arrays (bispectrum) and saves the images.
+
+    Intent(in): None
+
+    Returns: None
+    """
 
     t0 = time.time()
 
@@ -225,6 +256,13 @@ def process_raw_data():
     print('t=', tf-t0)
 
 def process_autoencoder_dataset():
+    """ Transforms the time series from the dataset to 2D arrays (bispectrum) and saves the images,
+     to be used to train and validate an autoencoder.
+
+    Intent(in): None
+
+    Returns: None
+    """
     t0 = time.time()
     tag = 2
 
@@ -271,6 +309,13 @@ def process_autoencoder_dataset():
     print('t=', tf-t0)
 
 def process_autoencoder_data():
+    """ Transforms the time series from example power signals to 2D arrays (bispectrum) and saves the images,
+     to be used to train and validate an autoencoder.
+
+    Intent(in): None
+
+    Returns: None
+    """
     t0 = time.time()
 
     tags = ['W_Air_cond','W_Computers','W_Audio_TV','W_Lights','W_Kitchen','W_Washing_m','W_Dish_w','W_Gas_boiler','W_Oven_vitro'] 
@@ -320,6 +365,13 @@ def process_autoencoder_data():
     print('t=', tf-t0)
 
 def process_signal(t, X):
+    """Filters and reshapes the time series X(t).
+
+    Intent(in): t (numpy.array), timestamps;
+                X (numpy.array), time series.
+
+    Returns: [t95, X95] (list of numpy.arrays), new timestamps and time series. 
+    """
     #Noise Mean Value Filter
     for _ in range(0,10):
         X = fortran_ts.time_series.mvf(asfortranarray(X), 2)

@@ -1,3 +1,4 @@
+"""Main module"""
 import os
 import sys
 import random
@@ -875,7 +876,7 @@ if __name__ == "__main__":
         # run = False
 
 
-    #Run examples 
+    #Run other examples 
 
     # VMD_example()
 

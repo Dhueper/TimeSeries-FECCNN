@@ -7,7 +7,7 @@ class Features():
     def __init__(self, t, X):
         """Computes different features of the signal.
 
-        Intent(in): Intent(in): t (numpy.array), timestamps;
+        Intent(in): t (numpy.array), timestamps;
                     X (numpy.array), time series.
         """
         self.t = t
@@ -97,7 +97,7 @@ class Features():
         return SP, fP
 
     def SCen(self):
-        """Computes the Spectral Centroid of the signal and its asociated frequency.
+        """Computes the Spectral Centroid of the signal.
 
         Intent(in): self (object), class Features.
 

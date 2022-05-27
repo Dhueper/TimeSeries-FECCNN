@@ -1,5 +1,4 @@
-#! /usr/bin/env python
-#
+"""Haar transform mdule: https://people.math.sc.edu/Burkardt/py_src/haar/haar.html"""
 import os
 import sys
 from numpy import amax, zeros, asfortranarray

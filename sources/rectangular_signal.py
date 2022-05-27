@@ -1,3 +1,4 @@
+"""Rectangular signal module"""
 import os
 import sys
 
@@ -33,6 +34,13 @@ def reshape_2pow(t, X):
     return [t_k, X_k]  
 
 def spectral_derivative(t, X):
+    """Computes the normalized spectral derivative of a time series.
+
+    Intent(in): t (numpy.array), timestamps;
+                X (numpy.array), time series.
+
+    Returns: dx_spec_norm (numpy.array), normalized spectral derivative back in the time domain.
+    """
     N = len(X)
     delta_t = t[1]-t[0]
 

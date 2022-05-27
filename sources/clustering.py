@@ -1,3 +1,4 @@
+"""Clustering module"""
 from vmdpy import VMD 
 import ewtpy
 from PyEMD import EMD

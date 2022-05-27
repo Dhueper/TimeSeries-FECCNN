@@ -1,3 +1,4 @@
+"""Neural Network module"""
 from keras.models import Sequential
 from keras.layers import Conv2D, Conv2DTranspose, Dense, MaxPooling2D, Dropout, Flatten
 from keras.utils import to_categorical
@@ -8,6 +9,13 @@ from numpy import load, argmax, sum, random, clip
 from matplotlib import pyplot as plt
 
 def CNN_bispectrum_model(input_shape, output_shape):
+    """CNN model for the bispectrum input.
+
+    Intent(in): input_shape (tuple), size of the input;
+                output_shape (integer), size of the output (number of classes).
+
+    Returns: model (keras.Sequential model), CNN model.
+    """
     #Bispectrum model 
     model = Sequential()
     model.add(Conv2D(32, kernel_size=3, activation='relu', input_shape=input_shape))
@@ -24,6 +32,13 @@ def CNN_bispectrum_model(input_shape, output_shape):
     return model
 
 def CNN_haar_model(input_shape, output_shape):
+    """CNN model for the Haar coefficients input.
+
+    Intent(in): input_shape (tuple), size of the input;
+                output_shape (integer), size of the output (number of classes).
+
+    Returns: model (keras.Sequential model), CNN model.
+    """
     #Haar model 
     model = Sequential()
     model.add(Conv2D(32, kernel_size=3, activation='relu', input_shape=input_shape))
@@ -40,6 +55,13 @@ def CNN_haar_model(input_shape, output_shape):
     return model
 
 def CNN_spectrogram_model(input_shape, output_shape):
+    """CNN model for the spectrogram input.
+
+    Intent(in): input_shape (tuple), size of the input;
+                output_shape (integer), size of the output (number of classes).
+
+    Returns: model (keras.Sequential model), CNN model.
+    """
     #Spectrogram model 
     model = Sequential()
     model.add(Conv2D(32, kernel_size=3, activation='relu', input_shape=input_shape))
@@ -56,6 +78,13 @@ def CNN_spectrogram_model(input_shape, output_shape):
     return model
 
 def CNN_features_model(input_shape, output_shape):
+    """CNN model for the spectral and statistical features input.
+
+    Intent(in): input_shape (tuple), size of the input;
+                output_shape (integer), size of the output (number of classes).
+
+    Returns: model (keras.Sequential model), CNN model.
+    """
     #Spectral and statistical features model 
     model = Sequential()
     model.add(Conv2D(32, kernel_size=3, activation='relu', input_shape=input_shape))
@@ -71,34 +100,13 @@ def CNN_features_model(input_shape, output_shape):
 
     return model
 
-def CNN_model(input_shape, output_shape):
-    #Bispectrum model 
-    model = Sequential()
-    model.add(Conv2D(32, kernel_size=3, activation='relu', input_shape=input_shape))
-    model.add(MaxPooling2D(pool_size=(3,3), padding='same'))
-    model.add(Dropout(0.1))
-    model.add(Conv2D(32, kernel_size=5, activation='relu'))
-    model.add(MaxPooling2D(pool_size=(4,4), padding='same'))
-    model.add(Dropout(0.1))
-    model.add(Flatten())
-    model.add(Dense(output_shape, activation='softmax'))
-
-    #Haar model 
-    # model = Sequential()
-    # model.add(Conv2D(32, kernel_size=3, activation='relu', input_shape=input_shape))
-    # model.add(MaxPooling2D(pool_size=(2,2), padding='same'))
-    # model.add(Dropout(0.1))
-    # model.add(Conv2D(64, kernel_size=2, activation='relu'))
-    # model.add(MaxPooling2D(pool_size=(2,2), padding='same'))
-    # model.add(Dropout(0.1))
-    # model.add(Flatten())
-    # model.add(Dense(output_shape, activation='softmax'))
-
-    model.compile(optimizer='adam', loss='categorical_crossentropy', metrics=['accuracy'])
-
-    return model
-
 def autoencoder_model(input_shape):
+    """Autoencoder model for the bispectrum input.
+
+    Intent(in): input_shape (tuple), size of the input.
+
+    Returns: model (keras.Sequential model), CNN model.
+    """
     model = Sequential()
     #Encoder 
     model.add(Conv2D(32, kernel_size=3, activation='relu', padding='same', input_shape=input_shape))
@@ -114,67 +122,6 @@ def autoencoder_model(input_shape):
     model.compile(optimizer='adam', loss='binary_crossentropy')
 
     return model
-
-def run_CNN():
-    N = 4
-    # size = 21
-    # size = 8
-    # size_x = 9
-    # size_y = 6
-    size = 4
-    CNN = CNN_features_model((4, 4,1), N)
-    CNN.summary()
-    # (X_train, y_train), (X_test, y_test) = mnist.load_data()
-
-    # X_train = X_train.reshape(60000,28,28,1)
-    # X_test = X_test.reshape(10000,28,28,1)
-
-    # print(X_train[0] )
-
-    # print(y_train[0] )
-
-    # y_train = to_categorical(y_train)
-    # y_test = to_categorical(y_test)
-
-    # print(y_train[0] )
-
-    # X_train = load('ElectricDevices/X_train_bispectrum.npy')
-    # X_test = load('ElectricDevices/X_test_bispectrum.npy')
-    # y_train = load('ElectricDevices/Y_train_bispectrum.npy')
-    # y_test = load('ElectricDevices/Y_test_bispectrum.npy')
-
-    # X_train = load('ElectricDevices/X_train_haar.npy')
-    # X_test = load('ElectricDevices/X_test_haar.npy')
-    # y_train = load('ElectricDevices/Y_train_haar.npy')
-    # y_test = load('ElectricDevices/Y_test_haar.npy')
-
-    # print(X_train.shape)
-    # print(y_train.shape)
-    # print(X_test.shape)
-    # print(y_test.shape)
-
-    # CNN.fit(X_train, y_train, validation_data=(X_test, y_test), epochs=20, batch_size=32)
-
-
-
-    # tags = ['W_Air_cond','W_Computers','W_Audio_TV','W_Lights','W_Kitchen','W_Washing_m','W_Dish_w','W_Gas_boiler','W_Oven_vitro'] 
-    # classes = {} 
-
-    # for tag in tags:
-
-    #     X_eval = load('ElectricDevices/X_eval_'+tag+'.npy')
-
-    #     prediction = CNN.predict(X_eval)
-    #     print()
-    #     print(tag)
-    #     print(prediction)
-    #     print('tag=', argmax(sum(prediction, axis=0)) + 1)
-    #     classes[tag] = argmax(sum(prediction, axis=0)) + 1
-
-        # print('tag=', argmax(prediction), argmax(prediction)%N + 1)
-        # classes[tag] =  argmax(prediction)%N + 1
-
-    # print(classes)
 
 def preprocess(array):
     """
@@ -228,10 +175,7 @@ def display(array1, array2):
     plt.show()
 
 if __name__ == "__main__":
-    #CNN classification 
-    run_CNN()
-
-    #Autoencoder
+    ##Autoencoder test real data
 
     # autoencoder = autoencoder_model((21,21,1))
 
@@ -255,7 +199,7 @@ if __name__ == "__main__":
 
     # display(Y_test, predictions)
 
-
+    ##Autoencoder test example data 
 
     # (X_train, _), (X_test, _) = mnist.load_data()
     # #preprocess 
