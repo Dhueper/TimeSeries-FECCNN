@@ -29,10 +29,24 @@ The selected approach is based on extracting some key features from the time ser
 Four different methodologies for feature extraction:
 
 a) Spectral and statistical features
-<img src="Figures/Features_input.png" width="512"/>
+
+<p align="center">
+  <img 
+    width="512"
+    height="512"
+    src="Figures/Features_input.png"
+  >
+</p>
 
 b) Bispectrum
-<img src="Figures/Bispectrum_input.png" width="512"/>
+
+<p align="center">
+  <img 
+    width="512"
+    height="512"
+    src="Figures/Bispectrum_input.png"
+  >
+</p>
 
 ![Spectrogram](Figures/Spectrogram_input.png)
 
