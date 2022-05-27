@@ -28,10 +28,11 @@ UK database of power signals to evaluate the software performances.
 The selected approach is based on extracting some key features from the time series and use them to transform the time series to a 2D array, which facilitates the subsequent classification.
 Four different methodologies for feature extraction:
 
-![Spectral and statistical features](Figures/Features_input.png)
+a) Spectral and statistical features
+<img src="Figures/Features_input.png" width="1024"/>
 
 b) Bispectrum
-<img src="Figures/Bispectrum_input.png" width="128"/>
+<img src="Figures/Bispectrum_input.png" width="1024"/>
 
 ![Spectrogram](Figures/Spectrogram_input.png)
 
