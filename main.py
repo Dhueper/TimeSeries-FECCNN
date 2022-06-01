@@ -682,12 +682,13 @@ def user_examples(N):
         y_test = load('ElectricDevices/Y_test_features.npy') 
 
         plt.figure()
+        plt.rcParams['font.size']='18' 
         plt.imshow(X_train[9,:,:])
-        plt.title('Example of spectral and statistical features input (log scale)')
+        # plt.title('Example of spectral and statistical features input (log scale)')
         plt.colorbar()
         plt.show()
 
-        CNN.fit(X_train, y_train, validation_data=(X_test, y_test), epochs=20, batch_size=32)
+        # CNN.fit(X_train, y_train, validation_data=(X_test, y_test), epochs=20, batch_size=32)
 
     def example_invalid():
         print('Invalid case selected. Select an example from 1 to 12.')

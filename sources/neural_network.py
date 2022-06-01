@@ -175,6 +175,7 @@ def display(array1, array2):
     plt.show()
 
 if __name__ == "__main__":
+    pass
     ##Autoencoder test real data
 
     # autoencoder = autoencoder_model((21,21,1))
