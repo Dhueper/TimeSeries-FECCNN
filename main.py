@@ -248,7 +248,7 @@ def user_examples(N):
         print('Example 6: Haar series expansion.')
 
         name = 'W_Computers'
-        [t0, X] = test_function.read('data/Sanse/20220301.plt', name) 
+        [t0, X] = test_function.read('data/03/20220301.plt', name) 
         plot(t0,X)
 
         t_max = amax(t0)
@@ -325,7 +325,7 @@ def user_examples(N):
             plt.ylabel('P [W]')
 
             for i in range(0,2):
-                [t0, X] = test_function.read('data/Sanse/2022030'+str(1 + 7*i)+'.plt', name) 
+                [t0, X] = test_function.read('data/03/2022030'+str(1 + 7*i)+'.plt', name) 
                 if i == 0:
                     ## Use envelope as pattern
                     if use_env:
@@ -333,7 +333,7 @@ def user_examples(N):
                         env[0,:]  = array(X)[:] 
                         X2 = zeros(len(X))
                         for j in range(1, 7):
-                            [t1, X1] = test_function.read('data/Sanse/2022030'+str(1 + 7*i + j)+'.plt', name)
+                            [t1, X1] = test_function.read('data/03/2022030'+str(1 + 7*i + j)+'.plt', name)
                             X2[0:min(len(X1), len(X2))]  = array(X1)[0:min(len(X1), len(X2))] 
                             env[j,:] = X2[:]  
                         # max_env = amax(env, axis=0) # Maximum envelope 
@@ -461,14 +461,14 @@ def user_examples(N):
             for name in name_list:
                 for i in range(0,2): 
                     if i == 0:
-                        [t0, X] = test_function.read('data/Sanse/2022030'+str(1)+'.plt', name)
+                        [t0, X] = test_function.read('data/03/2022030'+str(1)+'.plt', name)
                         ## Use envelope as pattern
                         if use_env:
                             env = zeros((7, len(X)))
                             env[0,:]  = array(X)[:] 
                             X2 = zeros(len(X))
                             for j in range(1, 7):
-                                [t1, X1] = test_function.read('data/Sanse/2022030'+str(1 + j)+'.plt', name)
+                                [t1, X1] = test_function.read('data/03/2022030'+str(1 + j)+'.plt', name)
 
                                 X2[0:min(len(X1), len(X2))]  = array(X1)[0:min(len(X1), len(X2))] 
                                 env[j,:] = X2[:]  
@@ -479,9 +479,9 @@ def user_examples(N):
 
                     elif i == 1:
                         if k<8:
-                            [t0, X] = test_function.read('data/Sanse/2022030'+str(2 + k)+'.plt', name)
+                            [t0, X] = test_function.read('data/03/2022030'+str(2 + k)+'.plt', name)
                         else:
-                            [t0, X] = test_function.read('data/Sanse/202203'+str(2 + k)+'.plt', name)
+                            [t0, X] = test_function.read('data/03/202203'+str(2 + k)+'.plt', name)
                         r = 0 # Artificial signal shift (useful to check the effect of shift on simple cases)  
                         p = 1 # Artificial scale (useful to check the effect of scaling on simple cases)
 
