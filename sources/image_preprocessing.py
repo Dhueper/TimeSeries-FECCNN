@@ -235,7 +235,7 @@ def process_raw_data():
     for tag in tags:
         X_eval = []
         for i in range(1,9):
-            [t, X] = test_function.read('data/Sanse/2022030'+str(i)+'.plt', tag) 
+            [t, X] = test_function.read('data/04/2022030'+str(i)+'.plt', tag) 
 
             [t95, X95] = process_signal(t, X) 
 
@@ -325,7 +325,7 @@ def process_autoencoder_data():
     Y_test = [] 
     for i in range(1,9):
         for tag1 in tags1:
-            [t, X] = test_function.read('data/Sanse/2022030'+str(i)+'.plt', tag1) 
+            [t, X] = test_function.read('data/04/2022030'+str(i)+'.plt', tag1) 
 
             [t1_95, X1_95] = process_signal(t, X) 
 
@@ -334,7 +334,7 @@ def process_autoencoder_data():
 
             for tag2 in tags:
                 if tag2 != key_tag and tag2 != tag1:
-                    [t, X] = test_function.read('data/Sanse/2022030'+str(i)+'.plt', tag2) 
+                    [t, X] = test_function.read('data/04/2022030'+str(i)+'.plt', tag2) 
 
                     [t2_95, X2_95] = process_signal(t, X) 
 

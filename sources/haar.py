@@ -1170,7 +1170,7 @@ if ( __name__ == '__main__' ):
     name = 'W_Lights'
     # name = 'W_Computers'
     # name = 'W_Gas_boiler'
-    [t0, X] = test_function.read('data/Sanse/20220301.plt', name) 
+    [t0, X] = test_function.read('data/04/20220301.plt', name) 
     # [t0, X] = test_function.sinusoidal_function()  
     t0 = t0 / amax(t0)
     Z = zeros(len(X))

@@ -193,7 +193,7 @@ def bandwidth_am():
 if __name__ == "__main__":
     # [t, X] = read_mars('data/mars-express-power-3years/train_set/power--2008-08-22_2010-07-10.csv', name='NPWD2451')
     name = 'W_Gas_boiler'
-    [t, X] = read('data/Sanse/20220301.plt', name)
+    [t, X] = read('data/04/20220301.plt', name)
 
     for _ in range(0,50):
         X = fortran_ts.time_series.mvf(asfortranarray(X), 0)
@@ -218,7 +218,7 @@ if __name__ == "__main__":
     # plt.show() 
 
     # name = 'W_Lights'
-    # [t, X] = read('data/Sanse/20220301.plt', name)
+    # [t, X] = read('data/04/20220301.plt', name)
 
     # #Noise Mean Value Filter
     # for _ in range(0,10):
@@ -250,7 +250,7 @@ if __name__ == "__main__":
 
     # name = 'W_Air_cond' 
     # for i in range(0, 7):
-    #     [t0, X] = read('data/Sanse/2022030'+str(1 + i)+'.plt', name)
+    #     [t0, X] = read('data/04/2022030'+str(1 + i)+'.plt', name)
     #     if i == 0:
     #         Y = zeros(len(X))
     #         Y[:] = X[:]
