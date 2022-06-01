@@ -43,7 +43,7 @@ a) Spectral and statistical features
 
 <p align="center">
   <img 
-    width="512"
+    width="650"
     height="512"
     src="Figures/Features_input.png"
   >
